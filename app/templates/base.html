@@ -1,0 +1,70 @@
+{% load static %}
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- CSS only -->
+    <link rel="stylesheet" type="text/css" href="{% static 'css/bootstrap.css' %}">
+    <link rel="stylesheet" href="{% static 'style.css' %}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <title>Document</title>
+  </head>
+  <body>
+
+    <div class="container-fluid container-lg" id="banner">
+      {% if user.is_authenticated %}
+      <div class="row">
+        <div class="col-12 g-0">
+          <nav class="navbar navbar-light bg-light px-2 navbar-expand-md">
+            <div class="container-fluid d-flex">
+
+              <div>
+                  {% block banner_left %}
+                    {% comment %} 
+                      This will allow for a custom element on each page.
+                      Dashboards will usually have a welcome and other pages will have a back button.
+                    {% endcomment %}
+                  {% endblock banner_left %}
+              </div>
+
+              <button class="navbar-toggler me-1" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+              </button>
+
+              <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                <ul class="navbar-nav ms-auto mb-lg-0">
+                  <li class="nav-item">
+                    <a class="navbar-brand mt-2 mt-sm-0 custom-nav-link" aria-current="page" href="{% url 'budget:budget_dashboard' %}">Budget Dashboard</a>
+                  </li>
+                  <li class="nav-item">
+                    <a class="navbar-brand custom-nav-link" href="{% url 'budget:transaction' %}">Add Transaction</a>
+                  </li>
+                  <li class="nav-item">
+                    <a class="navbar-brand me-0 custom-nav-link" href="{% url 'logout'%}">Log Out</a>
+                  </li>
+                </ul>
+              </div>
+
+            </div>
+          </nav>
+      {% endif %}      
+          {% block banner_flag %}
+
+          {% endblock banner_flag %}
+        </div>
+      </div>
+    </div>
+
+
+    {% block content %}
+
+    {% endblock %}
+
+    <script src="{% static 'js/bootstrap.js' %}"></script>
+  </body>
+</html>

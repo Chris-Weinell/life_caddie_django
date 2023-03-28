@@ -1,0 +1,56 @@
+{% extends 'base.html' %}
+
+{% load widget_tweaks %}
+
+{% block content %}
+
+<div class="container">
+
+  {% if form.errors %}
+    <p>Your username or password was incorrect.</p>
+  {% endif %}
+
+  <div class="row">
+
+    <div class="col-4">
+
+        {% include 'user_explanation.html' %}
+
+    </div>
+
+    <div class="col-1">
+
+    </div>
+
+    <div class="col-7">
+
+    <h4>Sign In</h4>
+  
+    <form method="post" action="{% url 'login' %}">
+        {% csrf_token %}
+        <label for="id_username" class="form-label">Email</label>
+        {{form.username|attr:"class:form-control"}}
+        <label for="id_password" class="form-label">Password</label>
+        {{form.password|add_class:'form-control'}}
+        <div class="d-flex justify-content-between mt-3">
+            <div>
+                <input type="submit" value="Log In" class="btn btn-primary">
+                <input type="hidden" name="next" value="{{next}}">
+            </div>
+            <div>
+                <a href="{% url 'password_reset' %}">Forgot Password?</a>
+            </div>
+        </div>
+    </form>
+
+    <hr class="mt-4">
+
+    <h4>Need an Account?</h4>
+    <a href="{% url 'core:signup' %}" class="btn btn-secondary mt-2">Sign Up</a>
+
+    </div>
+  </div>
+
+</div>
+
+{% endblock content %}

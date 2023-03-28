@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+
+{% block content %}
+  <div class="container">
+    <p class="mt-4">Click 'Get Started' to begin creating your budget!</p>
+    <form action="", method="POST">
+      {% csrf_token %}
+      {{form.user.as_hidden}}
+      {{form.month.as_hidden}}
+      {{form.year.as_hidden}}
+      <input class="btn btn-success mt-2" type="submit" value="Get Started">
+    </form>
+  </div>
+{% endblock %}

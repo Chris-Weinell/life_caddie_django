@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+
+{% block banner_left %}
+
+  <div>
+    <a class="btn btn-success d-flex align-items-center" href="{% url 'budget:budget_dashboard' %}">
+      <svg class="me-1" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-left" viewBox="0 0 16 16">
+        <path fill-rule="evenodd" d="M15 8a.5.5 0 0 0-.5-.5H2.707l3.147-3.146a.5.5 0 1 0-.708-.708l-4 4a.5.5 0 0 0 0 .708l4 4a.5.5 0 0 0 .708-.708L2.707 8.5H14.5A.5.5 0 0 0 15 8z"/>
+      </svg> Back
+    </a>
+  </div>
+
+{% endblock banner_left %}
+
+{% block content %}
+    <div class="container" id="transaction-table-container">
+        <table class="table table-hover table-responsive" id="transaction-table">
+            {% for month in transaction_data %}
+                <thead>
+                    <tr>
+                        <th colspan="6" class="transaction-list-month">{{month.name}}, {{month.year}}</th>
+                    </tr>
+                    <tr>
+                        <th>Amount</th>
+                        <th>Date</th>
+                        <th class="transaction-other-head">Category</th>
+                        <th class="transaction-other-head">Subcategory</th>
+                        <th class="transaction-other-head">Vendor</th>
+                        <th class="transaction-other-head">Account</th>
+                        <th>Notes</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for transaction in month.transactions %}
+                    <tr>
+                        <td class="transaction-primary"><a href="{% url 'budget:update_transaction' source transaction.subcategory.id transaction.id %}">{{transaction.amount}}</a></td>                
+                        <td class="transaction-primary">{{transaction.date}}</td>
+                        <td class="transaction-other">{{transaction.category.name}}</td>
+                        <td class="transaction-other">{{transaction.subcategory.name}}</td>
+                        <td class="transaction-other">{{transaction.vendor}}</td>
+                        <td class="transaction-other">{{transaction.account.name}}</td>
+                        <td class="transaction-note">{{transaction.notes}}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            {% endfor %}  
+        </table>
+    </div>
+{% endblock %}

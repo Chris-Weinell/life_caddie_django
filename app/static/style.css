@@ -1,0 +1,252 @@
+/* ------------------------------------------------------------- */
+/* Site Wide CSS */
+
+a {
+    text-decoration: none;
+}
+
+body {
+    font-family: 'Roboto', sans-serif;
+}
+
+input[type=checkbox][disabled] {
+    background-color: green;
+    opacity: 1;
+}
+
+/* ------------------------------------------------------------- */
+/* Custom CSS for Budget Dashboard Table */
+tr.hide-table-padding td {
+    padding: 0;
+}
+
+.expand-button {
+    position: relative;
+}
+
+.accordion-toggle .expand-button:after {
+    left: .75rem;
+    content: '-';
+}
+
+.accordion-toggle.collapsed .expand-button:after {
+    content: '+';
+}
+
+.num-transactions {
+    font-size: .8em;
+}
+
+#budget-dashboard-table {
+    overflow-x: auto;
+    display: block;
+}
+
+.budget-table-category {
+    max-width: 1px;
+    /* by setting max-width to 1px, it forces the table cells to the same width as the Table Headers */
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.table-category-column {
+    width: 100%;
+}
+
+.budget-table-subheader {
+    font-size: 1.2em;
+    color: green;
+    line-height: 1.36;
+}
+
+/* ------------------------------------------------------------- */
+/* Custom CSS for Month Select and Scrollbar */
+
+#month_year_div {
+    overflow-y: hidden;
+    scroll-behavior: 50%;
+}
+
+#id_month_year {
+    display: flex;
+}
+
+#id_month_year input {
+    display: none;
+}
+
+#id_month_year div {
+    min-width: 90px;
+    height: 50px;
+    border: 2px solid green;
+    color: green;
+    font-weight: 700;
+    border-radius: 15%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 10px 5px;
+}
+
+#id_month_year div label {
+    min-width: 90px;
+    height: 50px;
+    border-radius: 15%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+#id_month_year div:has(label input[type="radio"]:checked) {
+    color: white;
+    background-color: green;
+}
+
+
+#month_year_div::-webkit-scrollbar-track {
+    -webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.1);
+    background-color: #F5F5F5;
+    border-radius: 10px;
+}
+
+#month_year_div::-webkit-scrollbar {
+    width: 10px;
+    height: 8px;
+    background-color: #F5F5F5;
+}
+
+#month_year_div::-webkit-scrollbar-thumb {
+    border-radius: 10px;
+    background-color: #FFF;
+    background-image: -webkit-gradient(linear,
+            40% 0%,
+            75% 84%,
+            from(green),
+            to(green),
+            color-stop(.6, #54DE5D))
+}
+
+/* ------------------------------------------------------------- */
+/* Custom CSS for Page Banner */
+
+#heading {
+    width: 100vw;
+    max-width: 100%;
+    text-align: center;
+}
+
+#banner {
+    width: 100vw;
+}
+
+/* ------------------------------------------------------------- */
+/* Custom CSS for Budget Categories */
+
+#budget-categories {
+    font-size: 1.2em;
+    padding: 0;
+}
+
+#budget-categories a {
+    font-family: 'Roboto', sans-serif;
+}
+
+/* ------------------------------------------------------------- */
+/* Custom CSS for TransactionListView */
+
+.transaction-list-month {
+    font-size: 1.8em;
+    border: none;
+    text-decoration: underline;
+}
+
+#transaction-table {
+    overflow-x: auto;
+    display: block;
+}
+
+#transaction-table th {
+    white-space: nowrap;
+}
+
+.transaction-primary {
+    white-space: nowrap;
+}
+
+.transaction-other-head {
+    min-width: 120px;
+}
+
+.transaction-other {
+    max-width: 1px;
+    /* by setting max-width to 1px, it forces the table cells to the same width as the Table Headers */
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.transaction-note {
+    overflow: hidden;
+    max-width: 25ch;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+@media(min-width:992px) {
+    .transaction-note {
+        max-width: 25ch;
+    }
+}
+
+@media(min-width:1200px) {
+    .transaction-note {
+        max-width: 45ch;
+    }
+}
+
+@media(min-width:1400px) {
+    .transaction-note {
+        max-width: 65ch;
+    }
+}
+
+/* ------------------------------------------------------------- */
+/* Custom CSS for Tooltips */
+
+.tooltip-text {
+    display: none;
+}
+
+.tooltip-format:hover .tooltip-text {
+    display: inline;
+}
+
+/* ------------------------------------------------------------- */
+/* Custom CSS for Budget Dashboard Cards */
+
+.card-headers {
+    overflow: hidden;
+    max-width: 55%;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.subheader-links {
+    position: relative;
+}
+
+.fund-indicator::before {
+    content: "(F)";
+    font-size: .7em;
+    position: absolute;
+    right: 101%;
+    top: 15%;
+}
+
+/* ------------------------------------------------------------- */
+/* Custom CSS for Navbar */
+
+.custom-nav-link:hover {
+    text-decoration: underline;
+}

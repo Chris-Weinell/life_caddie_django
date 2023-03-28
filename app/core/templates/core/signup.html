@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+
+{% load widget_tweaks %}
+
+{% block content %}
+  <div class="container">
+    <div class="row">
+      <div class="col-4">
+        {% include 'user_explanation.html' %}
+      </div>
+
+      <div class="col-1"></div>
+
+      <div class="col-7">
+        <h4>Sign Up</h4>
+
+        <p>Enter an email address and choose a password to create a new account.</p>
+
+        <form action="" method="POST">
+          {% csrf_token %}
+          {% comment %} {{ form.as_p }} {% endcomment %}
+          <label for="id_email" class="form-label">Email</label>
+          {{ form.email|attr:'class:form-control' }}
+          <label for="id_password1" class="form-label">Password</label>
+          {{ form.password1|attr:'class:form-control' }}
+          <div class="container">
+            <ul>
+              <li>Your password can't be too similar to your other personal information.</li>
+              <li>Your password must contain at least 8 characters.</li>
+              <li>Your password can't be a commonly used password.</li>
+              <li>Your password can't be entirely numeric.</li>
+            </ul>
+          </div>
+          <label for="id_password2" class="form-label">Confirm Password</label>
+          {{ form.password2|attr:'class:form-control' }}
+          <hr class="my-4" />
+          <input type="submit" value="Sign Up" class="btn btn-primary" />
+        </form>
+      </div>
+    </div>
+  </div>
+{% endblock %}
