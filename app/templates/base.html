@@ -7,7 +7,10 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <!-- CSS only -->
-    <link rel="stylesheet" type="text/css" href="{% static 'css/bootstrap.css' %}">
+    {% comment %} <link rel="stylesheet" type="text/css" href="{% static 'css/bootstrap.css' %}"> {% endcomment %}
+    {% load bootstrap5 %}
+    {% bootstrap_css %}
+    {% bootstrap_javascript %}
     <link rel="stylesheet" href="{% static 'style.css' %}">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -65,6 +68,6 @@
 
     {% endblock %}
 
-    <script src="{% static 'js/bootstrap.js' %}"></script>
+    {% comment %} <script src="{% static 'js/bootstrap.js' %}"></script> {% endcomment %}
   </body>
 </html>
