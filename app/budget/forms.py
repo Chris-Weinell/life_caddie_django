@@ -9,12 +9,14 @@ from .month_year import month_year_choices
 
 
 class MonthSelectForm(forms.Form):
+    """Month Select Form on Budget Dashboard"""
     month_year = forms.ChoiceField(
         choices=month_year_choices,
         widget=forms.RadioSelect(attrs={'onchange': 'submit();'}))
 
 
 class AccountForm(LoginRequiredMixin, forms.ModelForm):
+    """Account Create and Update Form"""
     class Meta:
         model = Account
         fields = '__all__'
@@ -24,6 +26,7 @@ class AccountForm(LoginRequiredMixin, forms.ModelForm):
 
 
 class MonthForm(LoginRequiredMixin, forms.ModelForm):
+    """Month Create Form"""
     copy = forms.BooleanField(required=False, widget=forms.RadioSelect(
         choices=((True, 'Yes'), (False, 'No'))))
 
@@ -33,6 +36,7 @@ class MonthForm(LoginRequiredMixin, forms.ModelForm):
 
 
 class CategoryForm(LoginRequiredMixin, forms.ModelForm):
+    """Category Create and Update Form"""
     class Meta:
         model = Category
         fields = '__all__'
@@ -42,6 +46,7 @@ class CategoryForm(LoginRequiredMixin, forms.ModelForm):
 
 
 class SubCategoryForm(LoginRequiredMixin, forms.ModelForm):
+    """Subcategory Create and Update Form"""
     class Meta:
         model = SubCategory
         fields = '__all__'
@@ -65,6 +70,7 @@ class SubCategoryForm(LoginRequiredMixin, forms.ModelForm):
 
 
 class TransactionForm(LoginRequiredMixin, forms.ModelForm):
+    """Transaction Create and Update Form"""
     class Meta:
         model = Transaction
         fields = '__all__'

@@ -13,6 +13,7 @@ from . import models
 
 
 class UserCreationForm(forms.ModelForm):
+    """Creation Form for New Users."""
     password1 = forms.CharField(label='Password', widget=forms.PasswordInput)
     password2 = forms.CharField(
         label='Password confirmation', widget=forms.PasswordInput)

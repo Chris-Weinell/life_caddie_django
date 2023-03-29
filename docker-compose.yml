@@ -19,6 +19,8 @@ services:
       - DB_NAME=devdb
       - DB_USER=devuser
       - DB_PASS=changeme
+      - EMAIL_HOST_USER=your.life.caddie@gmail.com
+      - EMAIL_HOST_PASSWORD=yftixhazogcfnkjl
     depends_on:
       - db
 

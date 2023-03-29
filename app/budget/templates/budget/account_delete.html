@@ -17,7 +17,7 @@
     <form action="" method="POST">
       {% csrf_token %}
       <h4>{{ account }}</h4>
-      <p>Are you sure you want to delete this Account?</p>
+      <p>Are you sure you want to delete this Account?  This will remove it from any Transactions that it is associated with.</p>
       {{ form }}
       <input type="submit" value="Confirm" />
     </form>

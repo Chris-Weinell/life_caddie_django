@@ -13,37 +13,46 @@
 {% endblock banner_left %}
 
 {% block content %}
-    <div class="container" id="transaction-table-container">
-        <table class="table table-hover table-responsive" id="transaction-table">
-            {% for month in transaction_data %}
-                <thead>
-                    <tr>
-                        <th colspan="6" class="transaction-list-month">{{month.name}}, {{month.year}}</th>
-                    </tr>
-                    <tr>
-                        <th>Amount</th>
-                        <th>Date</th>
-                        <th class="transaction-other-head">Category</th>
-                        <th class="transaction-other-head">Subcategory</th>
-                        <th class="transaction-other-head">Vendor</th>
-                        <th class="transaction-other-head">Account</th>
-                        <th>Notes</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for transaction in month.transactions %}
-                    <tr>
-                        <td class="transaction-primary"><a href="{% url 'budget:update_transaction' source transaction.subcategory.id transaction.id %}">{{transaction.amount}}</a></td>                
-                        <td class="transaction-primary">{{transaction.date}}</td>
-                        <td class="transaction-other">{{transaction.category.name}}</td>
-                        <td class="transaction-other">{{transaction.subcategory.name}}</td>
-                        <td class="transaction-other">{{transaction.vendor}}</td>
-                        <td class="transaction-other">{{transaction.account.name}}</td>
-                        <td class="transaction-note">{{transaction.notes}}</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            {% endfor %}  
-        </table>
-    </div>
+
+    {% if transactions_exist %}
+        <div class="container" id="transaction-table-container">
+            <table class="table table-hover table-responsive" id="transaction-table">
+                {% for month in transaction_data %}
+                    {% if month.transactions %}
+                        <thead>
+                            <tr>
+                                <th colspan="6" class="transaction-list-month">{{month.name}}, {{month.year}}</th>
+                            </tr>
+                            <tr>
+                                <th>Amount</th>
+                                <th>Date</th>
+                                <th class="transaction-other-head">Category</th>
+                                <th class="transaction-other-head">Subcategory</th>
+                                <th class="transaction-other-head">Vendor</th>
+                                <th class="transaction-other-head">Account</th>
+                                <th>Notes</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for transaction in month.transactions %}
+                            <tr>
+                                <td class="transaction-primary"><a href="{% url 'budget:update_transaction' source transaction.subcategory.id transaction.id %}">{{transaction.amount}}</a></td>                
+                                <td class="transaction-primary">{{transaction.date}}</td>
+                                <td class="transaction-other">{{transaction.category.name}}</td>
+                                <td class="transaction-other">{{transaction.subcategory.name}}</td>
+                                <td class="transaction-other">{{transaction.vendor}}</td>
+                                <td class="transaction-other">{{transaction.account.name}}</td>
+                                <td class="transaction-note">{{transaction.notes}}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    {% endif %}
+                {% endfor %}  
+            </table>
+        </div>
+    {% else %}
+        <div class="container">
+            <h4 class="mt-4">You don't have any transactions yet. Go to your Dashboard to add some!</h4>
+        </div>
+    {% endif %}
 {% endblock %}

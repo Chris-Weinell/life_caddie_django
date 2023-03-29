@@ -29,6 +29,9 @@ def my_reverse(viewname, kwargs=None, additional=None):
 
 @login_required
 def budget_dashboard(request):
+    """
+    Generates User Budget Dashboard.
+    """
 
     if request.method == 'POST':
         form = forms.MonthSelectForm(request.POST)
@@ -72,7 +75,7 @@ def budget_dashboard(request):
     # If there was no session data on page load, default login values for Month and Year will be the current month and year.
     form.fields['month_year'].initial = f"{request.session['date']['month']}-{request.session['date']['year']}"
 
-    # limits month_year choices to 2 calendar years ago and 3 calendar years ahead.
+    # limits month_year choices to current year and next year.
     form.fields['month_year'].choices = [
         (f"{month}-{year}", f'{month_reference_dict[month]}, {year}') for year in range(datetime.now().year, datetime.now().year+2) for month in range(1, 13)
     ]
@@ -330,13 +333,15 @@ def budget_dashboard(request):
         'totals_reference': totals_reference,
         'month': month,
         'year': year,
-        'source': 'dashboard'
+        'source': 'dashboard',
+        'title': 'Budget Dashboard',
     }
 
     return render(request, 'budget/budget.html', context=context)
 
 
 class FirstMonthCreateView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
+    """Creates First User Month on Initial Login."""
     form_class = forms.MonthForm
     model = Month
     template_name = 'budget/first_month_form.html'
@@ -375,8 +380,14 @@ class FirstMonthCreateView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
         )
         return HttpResponseRedirect(reverse('budget:budget_dashboard'))
 
+    def get_context_data(self, *args, **kwargs):
+        context = super().get_context_data(*args, **kwargs)
+        context['title'] = 'First Month'
+        return context
+
 
 class NewMonthCreateView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
+    """Creates new user months."""
     form_class = forms.MonthForm
     model = Month
     template_name = 'budget/new_month_form.html'
@@ -399,6 +410,11 @@ class NewMonthCreateView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
         if month_exists:
             return False
         return True
+
+    def get_context_data(self, *args, **kwargs):
+        context = super().get_context_data(*args, **kwargs)
+        context['title'] = 'New Month'
+        return context
 
     def form_valid(self, form):
         # form.cleaned_data example - {'user': <User: weinellcj@live.com>, 'month': 3, 'year': 2023, 'copy': True}
@@ -451,6 +467,7 @@ class NewMonthCreateView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
 
 
 class AccountCreateView(LoginRequiredMixin, CreateView):
+    """Creates new user Accounts."""
     form_class = forms.AccountForm
     model = Account
     template_name = 'budget/account.html'
@@ -463,8 +480,11 @@ class AccountCreateView(LoginRequiredMixin, CreateView):
 
     def get_context_data(self, *args, **kwargs):
         context = super().get_context_data(*args, **kwargs)
+        context['title'] = 'Create Account'
         # template displays list view of existing accounts.
-        context['accounts'] = Account.objects.filter(user=self.request.user)
+        context['accounts'] = Account.objects.filter(
+            user=self.request.user
+        ).order_by('id')
         # source is used to route back button in Navbar.
         context['origin'] = 'create'
         context['source'] = self.kwargs['source']
@@ -505,13 +525,23 @@ class AccountCreateView(LoginRequiredMixin, CreateView):
 
 
 class AccountUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
+    """Updates existing User Accounts."""
     form_class = forms.AccountForm
     model = Account
     template_name = 'budget/account.html'
     success_url = reverse_lazy('budget:budget_dashboard')
 
+    def get_success_url(self, **kwargs):
+        if self.kwargs['origin'] == 'create':
+            return reverse('budget:account', kwargs={
+                'source': 'dashboard',
+            })
+        if self.kwargs['origin'] == 'list':
+            return reverse('budget:account_list')
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        context['title'] = 'Update Account'
         context['pk'] = self.kwargs['pk']
         # origin is used to route back button in Navbar.
         context['origin'] = self.kwargs['origin']
@@ -529,12 +559,16 @@ class AccountUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
 
 
 class AccountListView(LoginRequiredMixin, ListView):
+    """Lists all existing user accounts."""
     model = Account
     template_name = 'budget/account_list.html'
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        user_accounts = Account.objects.filter(user=self.request.user)
+        context['title'] = 'Accounts'
+        user_accounts = Account.objects.filter(
+            user=self.request.user
+        ).order_by('id')
         context['accounts'] = user_accounts
         # source is used to route back button in Navbar.
         context['origin'] = 'list'
@@ -542,11 +576,13 @@ class AccountListView(LoginRequiredMixin, ListView):
 
 
 class AccountDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
+    """Deletes User Accounts."""
     model = Account
     template_name = 'budget/account_delete.html'
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        context['title'] = 'Delete Account'
         context['pk'] = self.kwargs['pk']
         context['account'] = Account.objects.get(id=context['pk'])
         context['origin'] = self.kwargs['origin']
@@ -568,6 +604,7 @@ class AccountDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
 
 
 class CategoryCreateView(LoginRequiredMixin, CreateView):
+    """Creates New User Categories."""
     form_class = forms.CategoryForm
     model = Category
     template_name = 'budget/category.html'
@@ -584,8 +621,14 @@ class CategoryCreateView(LoginRequiredMixin, CreateView):
         }
         return initial
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['title'] = 'Create Category'
+        return context
+
 
 class CategoryUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
+    """Updates existing User Categories."""
     form_class = forms.CategoryForm
     model = Category
     template_name = 'budget/category.html'
@@ -593,6 +636,7 @@ class CategoryUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
 
     def get_context_data(self, *args, **kwargs):
         context = super().get_context_data(*args, **kwargs)
+        context['title'] = 'Update Category'
         context['category_id'] = self.kwargs['pk']
         return context
 
@@ -609,12 +653,14 @@ class CategoryUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
 
 
 class CategoryDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
+    "Deletes User Categories."
     model = Category
     template_name = 'budget/category_delete.html'
     success_url = reverse_lazy('budget:budget_dashboard')
 
     def get_context_data(self, *args, **kwargs):
         context = super().get_context_data(*args, **kwargs)
+        context['title'] = 'Delete Category'
         context['pk'] = self.kwargs['pk']
         context['category'] = Category.objects.get(id=context['pk'])
         return context
@@ -632,6 +678,7 @@ class CategoryDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
 
 
 class SubCategoryCreateView(LoginRequiredMixin, CreateView):
+    """Creates new user Subcategories"""
     form_class = forms.SubCategoryForm
     model = SubCategory
     template_name = 'budget/subcategory.html'
@@ -644,8 +691,14 @@ class SubCategoryCreateView(LoginRequiredMixin, CreateView):
         }
         return initial
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['title'] = 'Create Subcategory'
+        return context
+
 
 class SubCategoryUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
+    """Updates existing User Subcategories"""
     form_class = forms.SubCategoryForm
     model = SubCategory
     template_name = 'budget/subcategory.html'
@@ -653,6 +706,7 @@ class SubCategoryUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView)
 
     def get_context_data(self, *args, **kwargs):
         context = super().get_context_data(*args, **kwargs)
+        context['title'] = 'Update Subcategory'
         context['transactions'] = Transaction.objects.filter(
             subcategory=SubCategory.objects.get(
                 id=self.kwargs['pk']
@@ -682,12 +736,14 @@ class SubCategoryUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView)
 
 
 class SubCategoryDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
+    """Deletes User Subcategories."""
     model = SubCategory
     template_name = 'budget/subcategory_delete.html'
     success_url = reverse_lazy('budget:budget_dashboard')
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        context['title'] = 'Delete Subcategory'
         context['category_id'] = self.kwargs['category']
         context['subcategory_id'] = self.kwargs['pk']
         context['subcategory'] = SubCategory.objects.get(
@@ -709,6 +765,7 @@ class SubCategoryDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView)
 
 
 class TransactionCreateView(LoginRequiredMixin, CreateView):
+    """Creates new user Transactions."""
     form_class = forms.TransactionForm
     model = Transaction
     template_name = 'budget/transaction.html'
@@ -741,6 +798,7 @@ class TransactionCreateView(LoginRequiredMixin, CreateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        context['title'] = 'Add Transaction'
         # source is used to route back button in navbar if account create is entered from Transaction Create View
         context['source'] = 'create'
         context['vals'] = self.request.GET.get('vals', '')
@@ -750,10 +808,23 @@ class TransactionCreateView(LoginRequiredMixin, CreateView):
             context['category_id'] = SubCategory.objects.get(
                 id=context['subcategory_id']
             ).category_id
+        month = Month.objects.get(
+            user=self.request.user,
+            month=self.request.session['date']['month'],
+            year=self.request.session['date']['year']
+        )
+        categories = Category.objects.filter(
+            month=month
+        )
+        subcategories = SubCategory.objects.filter(
+            category__in=categories
+        )
+        context['subcategories_exist'] = subcategories
         return context
 
 
 class TransactionUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
+    """Updates existing User Transactions."""
     form_class = forms.TransactionForm
     model = Transaction
     template_name = 'budget/transaction.html'
@@ -770,6 +841,7 @@ class TransactionUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView)
 
     def get_context_data(self, *args, **kwargs):
         context = super().get_context_data(*args, **kwargs)
+        context['title'] = 'Update Transaction'
         context['update'] = True
         context['transaction_pk'] = self.kwargs['pk']
         context['subcategory_id'] = self.kwargs['subcategory_id']
@@ -779,6 +851,10 @@ class TransactionUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView)
         # source is used to route back button in Navbar.
         context['source'] = self.kwargs['source']
         context['vals'] = f"{context['source']}/{context['subcategory_id']}/{context['transaction_pk']}"
+        # 'subcategories_exist' is used in Transaction Create view to display
+        # a tooltip if the user has no subcategories. This can be disregarded
+        # in the Transaction Update View.
+        context['subcategories_exist'] = True
         return context
 
     def get_success_url(self, **kwargs):
@@ -804,11 +880,13 @@ class TransactionUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView)
 
 
 class TransactionListView(LoginRequiredMixin, ListView):
+    """List view of all of User's Transactions"""
     model = Transaction
     template_name = 'budget/transaction_list.html'
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        context['title'] = 'Transactions'
         user_months = Month.objects.filter(user=self.request.user)
         user_categories = Category.objects.filter(month__in=user_months)
         user_subcategories = SubCategory.objects.filter(
@@ -839,6 +917,9 @@ class TransactionListView(LoginRequiredMixin, ListView):
                 # Converts Expenses and Savings Deposits to be displayed as negatives.
                 if transaction.expense:
                     transaction.amount = 0-transaction.amount
+        # If user_transactions is empty, the user has no transactions and the
+        #     table will not be displayed.
+        context['transactions_exist'] = user_transactions
         context['transaction_data'] = transaction_data
         # source is used to route back button in Navbar.
         context['source'] = 'list_view'
@@ -846,6 +927,7 @@ class TransactionListView(LoginRequiredMixin, ListView):
 
 
 class TransactionDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
+    """Deletes User Transactions."""
     model = Transaction
     template_name = 'budget/transaction_delete.html'
 
@@ -857,6 +939,7 @@ class TransactionDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        context['title'] = 'Delete Transaction'
         # source is used to route back button in Navbar.
         context['source'] = self.kwargs['source']
         context['subcategory_id'] = self.kwargs['subcategory_id']

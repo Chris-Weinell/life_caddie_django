@@ -16,11 +16,17 @@
 
 {% block content %}
   <div class="container">
-    <h2 class="mt-4">Accounts</h2>
-    <ul>
-      {% for account in accounts %}
-        <li><a href="{% url 'budget:update_account' origin account.id %}">{{ account.name }}</a></li>
-      {% endfor %}
-    </ul>
+    {% if accounts %}
+      <h2 class="mt-4">Accounts</h2>
+      <ul>
+        {% for account in accounts %}
+          <li><a href="{% url 'budget:update_account' origin account.id %}">{{ account.name }}</a></li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <div class="container">
+        <h4 class="mt-4">You don't have any Accounts. Go to your Dashboard to add some!</h4>
+      </div>
+    {% endif %}
   </div>
 {% endblock %}

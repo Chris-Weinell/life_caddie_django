@@ -14,7 +14,7 @@
       </a>
     </div>
   {% endif %}
-  {% comment %} If the user goes to the Account Create View from Account Update View {% endcomment %}
+  {% comment %} If the user goes to the Account Create View from Account Update View using the back button. {% endcomment %}
   {% if not pk and source == "account_update" %}
     <div>
       <a class="btn btn-success d-flex align-items-center" href="{% url 'budget:budget_dashboard' %}">

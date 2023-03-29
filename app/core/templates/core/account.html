@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+
+{% block banner_left %}
+  <p class="navbar-brand mb-0 d-none d-sm-block">Welcome {{ user }}!</p>
+{% endblock %}
+
+{% block content %}
+  <div class="container">
+    <ul class="lead mt-3">
+        <li>
+            <a href="{% url 'password_reset' %}">Reset Password</a>
+        </li>
+    </ul>
+  </div>
+{% endblock %}

@@ -41,6 +41,7 @@ class UserManager(BaseUserManager):
 
 
 class User(AbstractBaseUser):
+    """Custom User Model."""
     email = models.EmailField(
         verbose_name='email address',
         max_length=255,
@@ -61,22 +62,20 @@ class User(AbstractBaseUser):
 
     def has_perm(self, perm, obj=None):
         "Does the user have a specific permission?"
-        # Simplest possible answer: Yes, always
         return True
 
     def has_module_perms(self, app_label):
         "Does the user have permissions to view the app `app_label`?"
-        # Simplest possible answer: Yes, always
         return True
 
     @property
     def is_staff(self):
         "Is the user a member of staff?"
-        # Simplest possible answer: All admins are staff
         return self.is_admin
 
 
 class Account(models.Model):
+    """Account Model"""
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     name = models.CharField(max_length=200)
 
@@ -88,6 +87,7 @@ class Account(models.Model):
 
 
 class Month(models.Model):
+    """Month Model"""
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     month = models.IntegerField(
         validators=[MinValueValidator(1), MaxValueValidator(12)])
@@ -101,6 +101,7 @@ class Month(models.Model):
 
 
 class Category(models.Model):
+    """Category Model"""
     month = models.ForeignKey(Month, on_delete=models.CASCADE)
     name = models.CharField(max_length=200)
 
@@ -112,7 +113,7 @@ class Category(models.Model):
 
 
 class SubCategory(models.Model):
-
+    """Subcategory Model"""
     fund_choices = (
         (False, 'No'),
         (True, 'Yes'),
@@ -138,6 +139,7 @@ class SubCategory(models.Model):
 
 
 class Transaction(models.Model):
+    """Transaction Model"""
     expense_choices = (
         (True, 'Expense/Savings Deposit'),
         (False, 'Income/Savings Withdrawal'),

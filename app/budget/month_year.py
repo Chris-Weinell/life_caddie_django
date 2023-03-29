@@ -1,3 +1,7 @@
+"""
+Month and Year objects referenced in Django Forms.
+"""
+
 month_reference_dict = {
     1: 'Jan',
     2: 'Feb',
