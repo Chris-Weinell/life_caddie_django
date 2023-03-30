@@ -34,5 +34,7 @@ month_reference_dict_full = {
 
 
 month_year_choices = [
-    (f"{month}-{year}", f'{month_reference_dict[month]}, {year}') for year in range(2000, 2051) for month in range(1, 13)
+    (f"{month}-{year}", f"{month_reference_dict[month]}, {year}")
+    for year in range(2000, 2051)
+    for month in range(1, 13)
 ]

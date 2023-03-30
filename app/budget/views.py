@@ -5,7 +5,6 @@ from django.views.generic.list import ListView
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseRedirect
-from django.core.exceptions import PermissionDenied
 
 from core.models import Month, Category, SubCategory, Transaction, Account
 from . import forms
@@ -45,11 +44,17 @@ def budget_dashboard(request):
     else:
         form = forms.MonthSelectForm()
 
-        # This sets month/year data equal to the current month/year in the event that there
-        #    is not sessions data for these values or if an associated Object for the current month
-        #    does not exist.  This will occur when the user clicks 'Cancel' on the Create New Month
-        #    screen.
-        if 'date' not in request.session or Month.objects.filter(user=request.user, month=request.session['date']['month'], year=request.session['date']['year']).exists() is False:
+        # This sets month/year data equal to the current month/year in
+        # the event that there is not sessions data for these values
+        # or if an associated Object for the current month does not
+        # exist.  This will occur when the user clicks 'Cancel' on
+        # the Create New Month screen.
+        if 'date' not in request.session or \
+                not Month.objects.filter(
+                    user=request.user,
+                    month=request.session['date']['month'],
+                    year=request.session['date']['year']
+                ).exists():
             current_month = datetime.now().month
             current_year = datetime.now().year
 
@@ -58,8 +63,9 @@ def budget_dashboard(request):
                 'year': current_year
             }
 
-    # This logic checks to see if the logged in user has created any Months to attach a budget to.
-    #     If they have not, it redirects them to the page to create their first month.
+    # This logic checks to see if the logged in user has created any
+    # Months to attach a budget to. If they have not, it redirects
+    # them to the page to create their first month.
     budgets_exist = Month.objects.filter(user=request.user)
     if not budgets_exist:
         return HttpResponseRedirect(reverse('budget:first_month'))
@@ -72,18 +78,24 @@ def budget_dashboard(request):
     if not month_exists:
         return HttpResponseRedirect(reverse('budget:new_month'))
 
-    # If there was no session data on page load, default login values for Month and Year will be the current month and year.
-    form.fields['month_year'].initial = f"{request.session['date']['month']}-{request.session['date']['year']}"
+    # If there was no session data on page load, default login
+    # values for Month and Year will be the current month and year.
+    form_month = request.session['date']['month']
+    form_year = request.session['date']['year']
+    form.fields['month_year'].initial = f"{form_month}-{form_year}"
 
     # limits month_year choices to current year and next year.
     form.fields['month_year'].choices = [
-        (f"{month}-{year}", f'{month_reference_dict[month]}, {year}') for year in range(datetime.now().year, datetime.now().year+2) for month in range(1, 13)
+        (f"{month}-{year}", f"{month_reference_dict[month]}, {year}")
+        for year in range(datetime.now().year, datetime.now().year + 2)
+        for month in range(1, 13)
     ]
 
-    #######################################################################################
-    ### This generates the data that is displayed on the Cards section of the page.  ###
+    ##########################################################
+    # This generates data that is displayed on the Cards section of the page.
 
-    # This creates a list of the Categories associated with the logged-in user and the selected month and year.
+    # This creates a list of the Categories associated with
+    # the logged-in user and the selected month and year.
     categories = Category.objects.filter(
         month=Month.objects.get(
             user=request.user,
@@ -97,32 +109,37 @@ def budget_dashboard(request):
         category.subcategories = SubCategory.objects.filter(
             category=category
         ).order_by('id')
-        # This totals the amounts of the Transactions of each subcategory so it can be attached
-        #     to account cards.
+        # This totals the amounts of the Transactions of each subcategory
+        # so it can be attached to account cards.
         for subcategory in category.subcategories:
             if subcategory.type == 'expense' or subcategory.type == 'savings':
                 transactions = Transaction.objects.filter(
                     subcategory=subcategory)
-                subcategory.current = 0+(sum(i.amount for i in transactions if i.expense is True)) - (
-                    sum(i.amount for i in transactions if i.expense is False))
+                subcategory.current = sum(
+                    i.amount for i in transactions if i.expense
+                ) - \
+                    sum(i.amount for i in transactions if not i.expense)
             else:
                 transactions = Transaction.objects.filter(
                     subcategory=subcategory)
-                subcategory.current = 0-(sum(i.amount for i in transactions if i.expense is True)) + \
-                    (sum(i.amount for i in transactions if i.expense is False))
+                subcategory.current = -sum(
+                    i.amount for i in transactions if i.expense
+                ) + \
+                    sum(i.amount for i in transactions if not i.expense)
 
-    #######################################################################################
-    #######################################################################################
-    ### This generates the data that is displayed on the spent/planned/remaining table. ###
+    #########################################################
+    #########################################################
+    # Generates the data that is shown on the spent/planned/remaining table.
 
-    # This references the categories queryset declared above to find all subcateogires
-    #    associated with the logged-in user
+    # This references the categories queryset declared above to find
+    # all subcateogires associated with the logged-in user
     subcategories = SubCategory.objects.filter(
         category_id__in=[category.id for category in categories]
     ).order_by('id')
 
-    # table_reference contains the data for each subcategory seperated by subcategory type.
-    #    This data will be pushed to the budget template as context to build the data table.
+    # table_reference contains the data for each subcategory seperated
+    # by subcategory type. This data will be pushed to the budget
+    # template as context to build the data table.
     table_reference = {
         'expense': [],
         'savings': [],
@@ -134,14 +151,16 @@ def budget_dashboard(request):
         )
 
         ######
-        # Below Logic generates variables needed for funds to be calculated across multiple months' budgets
+        # Below Logic generates variables needed for funds to be
+        # calculated across multiple months' budgets
         if subcategory.fund:
 
             category_name = Category.objects.get(
                 id=subcategory.category_id
             ).name
 
-            # queries user's months, filters by month/year values that precede the selected month.
+            # queries user's months, filters by month/year values
+            # that precede the selected month.
             # filter 1: month<current month, year==current year
             # filter 2: year<current year
             previous_months = Month.objects.filter(
@@ -176,7 +195,8 @@ def budget_dashboard(request):
                         fund=True
                     ).exists():
 
-                        # previous subcategories are selected by name and category id matching the selected month.
+                        # previous subcategories are selected by name and
+                        # category id matching the selected month.
                         previous_subcategory = SubCategory.objects.get(
                             name=subcategory.name,
                             type=subcategory.type,
@@ -185,26 +205,43 @@ def budget_dashboard(request):
 
                         previous_amount += previous_subcategory.amount
 
-                        # 'income' remaining values are reverse of expenses and savings - shows how much is left to receive, not to spend.
-                        # This requires transactions flagged 'expense=False' to be subtracted and 'expense=True' to be added.
-                        # expense and savings transaction are opposite.
+                        # 'income' remaining values are reverse of expenses
+                        # and savings - shows how much is left to receive,
+                        # not to spend. This requires transactions flagged
+                        # 'expense=False' to be subtracted and 'expense=True'
+                        # to be added. expense and savings transaction are
+                        # opposite.
                         if subcategory.type == 'income':
-                            previous_transactions += sum(transaction.amount if transaction.expense is False else (
-                                0-transaction.amount) for transaction in Transaction.objects.filter(subcategory_id=previous_subcategory.id))
+                            previous_transactions += sum(
+                                transaction.amount if not transaction.expense
+                                else -transaction.amount
+                                for transaction in Transaction.objects.filter(
+                                    subcategory_id=previous_subcategory.id
+                                )
+                            )
                         else:
-                            previous_transactions += sum(transaction.amount if transaction.expense is True else (
-                                0-transaction.amount) for transaction in Transaction.objects.filter(subcategory_id=previous_subcategory.id))
+                            previous_transactions += sum(
+                                transaction.amount if transaction.expense
+                                else -transaction.amount
+                                for transaction
+                                in Transaction.objects.filter(
+                                    subcategory_id=previous_subcategory.id
+                                )
+                            )
         ######
 
         if subcategory.type == 'expense':
-            # spent - expenses are added and income is subtracted so in the table display the
-            #     the spent column will show a positive figure indicating a positive amount
-            #     has been spent.
-            spent = 0+(sum(i.amount for i in transactions if i.expense is True)) - \
+            # spent - expenses are added and income is subtracted so in
+            # the table display the the spent column will show a positive
+            # figure indicating a positive amount has been spent.
+            spent = 0+(sum(
+                i.amount for i in transactions if i.expense is True
+            )) - \
                 (sum(i.amount for i in transactions if i.expense is False))
             previous_remaining = 0
             if subcategory.fund:
-                # previous_amount and previous_transactions are calc'ed in fund logic above
+                # previous_amount and previous_transactions are calc'ed in
+                # fund logic above
                 previous_remaining = previous_amount-previous_transactions
             expense_data = {
                 'category': Category.objects.get(subcategory=subcategory).name,
@@ -217,7 +254,8 @@ def budget_dashboard(request):
                     subcategory_id=subcategory.id
                 ).order_by('-date')
             }
-            # Transaction data will be displayed in a collapsible table or card under each subcategory.
+            # Transaction data will be displayed in a collapsible
+            # table or card under each subcategory.
             for transaction in expense_data['transactions']:
                 # This is needed if account_id has a null value.
                 if transaction.account_id:
@@ -225,14 +263,19 @@ def budget_dashboard(request):
                         id=transaction.account_id)
             table_reference['expense'].append(expense_data)
         if subcategory.type == 'income':
-            # received - expenses are subtracted and income is added so in the table display the
-            #     the received column will show a positive figure indicating a positive amount
-            #     has been received.  (Note - This is opposite of the spent formula above.)
-            received = 0-(sum(i.amount for i in transactions if i.expense is True)) + \
+            # received - expenses are subtracted and income is
+            # added so in the table display the the received
+            # column will show a positive figure indicating a
+            # positive amount has been received.  (Note - This
+            # is opposite of the spent formula above.)
+            received = 0-(sum(
+                i.amount for i in transactions if i.expense is True)
+            ) + \
                 (sum(i.amount for i in transactions if i.expense is False))
             previous_remaining = 0
             if subcategory.fund:
-                # previous_amount and previous_transactions are calc'ed in fund logic above
+                # previous_amount and previous_transactions are
+                # calc'ed in fund logic above
                 previous_remaining = previous_amount-previous_transactions
             income_data = {
                 'category': Category.objects.get(subcategory=subcategory).name,
@@ -245,7 +288,8 @@ def budget_dashboard(request):
                     subcategory_id=subcategory.id
                 ).order_by('-date')
             }
-            # Transaction data will be displayed in a collapsible table or card under each subcategory.
+            # Transaction data will be displayed in a collapsible
+            # table or card under each subcategory.
             for transaction in income_data['transactions']:
                 # This is needed if account_id has a null value.
                 if transaction.account_id:
@@ -253,14 +297,19 @@ def budget_dashboard(request):
                         id=transaction.account_id)
             table_reference['income'].append(income_data)
         if subcategory.type == 'savings':
-            # saved - expenses are added and income is subtracted so in the table display the
-            #     the spent column will show a positive figure indicating a positive amount
-            #     has been spent. (This is the same as the expense formula above.)
-            saved = 0+(sum(i.amount for i in transactions if i.expense is True)) - \
+            # saved - expenses are added and income is subtracted
+            # so in the table display the the spent column will
+            # show a positive figure indicating a positive amount
+            # has been spent. (This is the same as the expense formula
+            # above.)
+            saved = 0+(sum(
+                i.amount for i in transactions if i.expense is True
+            )) - \
                 (sum(i.amount for i in transactions if i.expense is False))
             previous_remaining = 0
             if subcategory.fund:
-                # previous_amount and previous_transactions are calc'ed in fund logic above
+                # previous_amount and previous_transactions are
+                # calc'ed in fund logic above
                 previous_remaining = previous_amount-previous_transactions
             savings_data = {
                 'category': Category.objects.get(subcategory=subcategory).name,
@@ -272,19 +321,23 @@ def budget_dashboard(request):
                 'transactions': Transaction.objects.filter(
                     subcategory_id=subcategory.id
                 ).order_by('-date'),
-                # account_value is a unique column to 'savings' and replaces the Fund Column as all savings
-                #      subcategories are required to be funds.  It is the sum of all transactions in the
-                #      account from current and previous months.
+                # account_value is a unique column to 'savings' and
+                # replaces the Fund Column as all savings subcategories
+                # are required to be funds.  It is the sum of all
+                # transactions in the account from current and previous
+                # months.
                 'account_value': previous_transactions+saved
             }
-            # Transaction data will be displayed in a collapsible table or card under each subcategory.
+            # Transaction data will be displayed in a collapsible table or
+            # card under each subcategory.
             for transaction in savings_data['transactions']:
                 # This is needed if account_id has a null value.
                 if transaction.account_id:
                     transaction.account = Account.objects.get(
                         id=transaction.account_id)
             table_reference['savings'].append(savings_data)
-    # This sorts the table data so it is displayed with categories shown together in the budget table.
+    # This sorts the table data so it is displayed with categories
+    # shown together in the budget table.
     table_reference['expense'] = sorted(
         table_reference['expense'], key=lambda d: d['category'])
     table_reference['savings'] = sorted(
@@ -322,7 +375,7 @@ def budget_dashboard(request):
     else:
         totals_reference['over_under'] = ''
 
-    #######################################################################################
+    ##############################################################
 
     month = month_reference_dict_full[request.session['date']['month']]
     year = request.session['date']['year']
@@ -340,15 +393,20 @@ def budget_dashboard(request):
     return render(request, 'budget/budget.html', context=context)
 
 
-class FirstMonthCreateView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
+class FirstMonthCreateView(
+    LoginRequiredMixin,
+    UserPassesTestMixin,
+    CreateView
+):
     """Creates First User Month on Initial Login."""
     form_class = forms.MonthForm
     model = Month
     template_name = 'budget/first_month_form.html'
     success_url = reverse_lazy('budget:budget_dashboard')
 
-    # Copy is a field that is used in the NewMonthCreateForm. Default Value is set to
-    #    False so it can be disregarded in the FirstMonthCreate functionality.
+    # Copy is a field that is used in the NewMonthCreateForm. Default
+    # Value is set to False so it can be disregarded in the
+    # FirstMonthCreate functionality.
     def get_initial(self):
         initial = {
             'user': self.request.user,
@@ -364,7 +422,8 @@ class FirstMonthCreateView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
         return False
 
     def form_valid(self, form):
-        # form.cleaned_data example - {'user': <User: test3@test.com>, 'month': 2, 'year': 2023, 'copy': False}
+        # form.cleaned_data example - {'user': <User: test3@test.com>,
+        # 'month': 2, 'year': 2023, 'copy': False}
         first_month = Month.objects.create(
             month=form.cleaned_data['month'],
             year=form.cleaned_data['year'],
@@ -417,8 +476,9 @@ class NewMonthCreateView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
         return context
 
     def form_valid(self, form):
-        # form.cleaned_data example - {'user': <User: weinellcj@live.com>, 'month': 3, 'year': 2023, 'copy': True}
-        # below if statement creates user's existing categories and subcategories into the new month.
+        # form.cleaned_data example - {'user': <User: weinellcj@live.com>,
+        # 'month': 3, 'year': 2023, 'copy': True} below if statement creates
+        # user's existing categories and subcategories into the new month.
         if form.cleaned_data['copy']:
             month_now = datetime.now().month
             year_now = datetime.now().year
@@ -438,16 +498,19 @@ class NewMonthCreateView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
                 month=current_month
             )
             for category in pre_month_categories:
-                # recreates the previous month's categories using the id of the new month.
+                # recreates the previous month's categories using
+                # the id of the new month.
                 new_category = Category.objects.create(
                     name=category.name,
                     month_id=new_month.id
                 )
-                # finds all subcategories associated with the current category from the previous month.
+                # finds all subcategories associated with the current
+                # category from the previous month.
                 subcategories = SubCategory.objects.filter(
                     category=category
                 )
-                # recreates the previous category's subcategories using the new category's id.
+                # recreates the previous category's subcategories
+                # using the new category's id.
                 for subcategory in subcategories:
                     SubCategory.objects.create(
                         name=subcategory.name,
@@ -489,9 +552,10 @@ class AccountCreateView(LoginRequiredMixin, CreateView):
         context['origin'] = 'create'
         context['source'] = self.kwargs['source']
         context['vals'] = self.request.GET.get('vals', '')
-        # If Create Account View is entered from Update Transaction View, Transaction Data is attached to
-        #     the url as a string.  The Back Button and Success URL will use that url data to get back to
-        #     the correct transaction after an account is created.
+        # If Create Account View is entered from Update Transaction
+        # View, Transaction Data is attached to the url as a string.
+        # The Back Button and Success URL will use that url data
+        # to get back to the correct transaction after an account is created.
         transaction_data = context['vals'].split('/')
         if len(transaction_data) == 3:
             context['trans_source'] = transaction_data[0]
@@ -509,14 +573,18 @@ class AccountCreateView(LoginRequiredMixin, CreateView):
         # If the Create Account link is clicked in the Dashboard.
         if self.kwargs['source'] == 'dashboard':
             return reverse_lazy('budget:budget_dashboard')
-        # If the Create Account link is clicked from within a Create Transaction View.
+        # If the Create Account link is clicked from within a Create
+        # Transaction View.
         if self.kwargs['source'] == 'create':
-            # If a user enters the Transaction Create View from within a subcategory, data will be attached
-            #    to the url as a urlconf.  my_reverse func preserves that urlconf and passes it back to the url
-            #    when reverse is called so the default values are the same when it returns to the transaction view.
+            # If a user enters the Transaction Create View from within a
+            # subcategory, data will be attached to the url as a urlconf.
+            # my_reverse func preserves that urlconf and passes it back
+            # to the url when reverse is called so the default values
+            # are the same when it returns to the transaction view.
             return my_reverse('budget:transaction', additional=vals)
-        # If the Create Account Link is clicked from within an Update Transaction View.
-        if self.kwargs['source'] == 'subcategory_view' or self.kwargs['source'] == 'list_view':
+        # If the Create Account Link is clicked from within an Update
+        # Transaction View.
+        if self.kwargs['source'] in {'subcategory_view', 'list_view'}:
             return reverse('budget:update_transaction', kwargs={
                 'source': trans_source,
                 'subcategory_id': trans_sub_id,
@@ -545,12 +613,14 @@ class AccountUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
         context['pk'] = self.kwargs['pk']
         # origin is used to route back button in Navbar.
         context['origin'] = self.kwargs['origin']
-        # source is used to route successurls in account views accessed from transaction views.
+        # source is used to route successurls in account views
+        # accessed from transaction views.
         context['source'] = 'account_update'
         return context
 
     def test_func(self, **kwargs):
-        # Verifies account is associated with logged in user if the url is manually updated.
+        # Verifies account is associated with logged in user if
+        # the url is manually updated.
         user_account_ids = [
             i.id for i in Account.objects.filter(user=self.request.user)]
         if self.kwargs['pk'] not in user_account_ids:
@@ -595,7 +665,8 @@ class AccountDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
             return reverse('budget:account_list')
 
     def test_func(self, *args, **kwargs):
-        # Verifies account is associated with logged in user if the url is manually updated.
+        # Verifies account is associated with logged in user
+        # if the url is manually updated.
         user_account_ids = [
             i.id for i in Account.objects.filter(user=self.request.user)]
         if self.kwargs['pk'] not in user_account_ids:
@@ -611,7 +682,7 @@ class CategoryCreateView(LoginRequiredMixin, CreateView):
     success_url = reverse_lazy('budget:budget_dashboard')
 
     def get_initial(self):
-        # hidden field associates created account with currently selected month.
+        # hidden field associates created account with selected month.
         initial = {
             'month': Month.objects.get(
                 user=self.request.user,
@@ -641,8 +712,9 @@ class CategoryUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
         return context
 
     def test_func(self, **kwargs):
-        # If a user manually enters a value in the url for <int:pk>, this makes sure the id of the Category they
-        #    are updating is associated with their User Account.
+        # If a user manually enters a value in the url for <int:pk>, this
+        # makes sure the id of the Category they are updating is associated
+        # with their User Account.
         user_month_ids = [
             i.id for i in Month.objects.filter(user=self.request.user)]
         user_category_ids = [i.id for i in Category.objects.filter(
@@ -666,8 +738,9 @@ class CategoryDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
         return context
 
     def test_func(self, *args, **kwargs):
-        # If a user manually enters a value in the url for <int:pk>, this makes sure the id of the Category they
-        #    are updating is associated with their User Account.
+        # If a user manually enters a value in the url for <int:pk>, this
+        # makes sure the id of the Category they are updating is associated
+        # with their User Account.
         user_month_ids = [
             i.id for i in Month.objects.filter(user=self.request.user)]
         user_category_ids = [i.id for i in Category.objects.filter(
@@ -697,7 +770,11 @@ class SubCategoryCreateView(LoginRequiredMixin, CreateView):
         return context
 
 
-class SubCategoryUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
+class SubCategoryUpdateView(
+    LoginRequiredMixin,
+    UserPassesTestMixin,
+    UpdateView
+):
     """Updates existing User Subcategories"""
     form_class = forms.SubCategoryForm
     model = SubCategory
@@ -722,8 +799,9 @@ class SubCategoryUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView)
         return context
 
     def test_func(self):
-        # If a user manually enters a value in the url for <int:pk>, this makes sure the id of the Subcategory they
-        #    are updating is associated with their User Account.
+        # If a user manually enters a value in the url for <int:pk>, this
+        # makes sure the id of the Subcategory they are updating is
+        # associated with their User Account.
         user_month_ids = [
             i.id for i in Month.objects.filter(user=self.request.user)]
         user_category_ids = [i.id for i in Category.objects.filter(
@@ -735,7 +813,11 @@ class SubCategoryUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView)
         return True
 
 
-class SubCategoryDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
+class SubCategoryDeleteView(
+    LoginRequiredMixin,
+    UserPassesTestMixin,
+    DeleteView
+):
     """Deletes User Subcategories."""
     model = SubCategory
     template_name = 'budget/subcategory_delete.html'
@@ -751,8 +833,9 @@ class SubCategoryDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView)
         return context
 
     def test_func(self, *args, **kwargs):
-        # If a user manually enters a value in the url for <int:pk>, this makes sure the id of the Subcategory they
-        #    are updating is associated with their User Account.
+        # If a user manually enters a value in the url for <int:pk>,
+        # this makes sure the id of the Subcategory they are updating
+        # is associated with their User Account.
         user_month_ids = [
             i.id for i in Month.objects.filter(user=self.request.user)]
         user_category_ids = [i.id for i in Category.objects.filter(
@@ -772,8 +855,9 @@ class TransactionCreateView(LoginRequiredMixin, CreateView):
     success_url = reverse_lazy('budget:budget_dashboard')
 
     def get_initial(self, *args, **kwargs):
-        # vals defines the subcategory id and the type (income, expense, savings) of the selected
-        #    subcategory if a transaction is created directly from the subcategory page.
+        # vals defines the subcategory id and the type (income,
+        # expense, savings) of the selected subcategory if a
+        # transaction is created directly from the subcategory page.
         vals = (self.request.GET.get('vals', '')).split('/')
         if len(vals) == 2:
             type = vals[0]
@@ -799,7 +883,8 @@ class TransactionCreateView(LoginRequiredMixin, CreateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['title'] = 'Add Transaction'
-        # source is used to route back button in navbar if account create is entered from Transaction Create View
+        # source is used to route back button in navbar if account create is
+        # entered from Transaction Create View
         context['source'] = 'create'
         context['vals'] = self.request.GET.get('vals', '')
         if context['vals']:
@@ -823,7 +908,11 @@ class TransactionCreateView(LoginRequiredMixin, CreateView):
         return context
 
 
-class TransactionUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
+class TransactionUpdateView(
+    LoginRequiredMixin,
+    UserPassesTestMixin,
+    UpdateView
+):
     """Updates existing User Transactions."""
     form_class = forms.TransactionForm
     model = Transaction
@@ -862,8 +951,12 @@ class TransactionUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView)
             id=context['subcategory_id']).category_id
         context['category_id'] = category_id
         # source is used to route back button in Navbar.
+
         context['source'] = self.kwargs['source']
-        context['vals'] = f"{context['source']}/{context['subcategory_id']}/{context['transaction_pk']}"
+        source = context['source']
+        sub_id = context['subcategory_id']
+        trans_pk = context['transaction_pk']
+        context['vals'] = f"{source}/{sub_id}/{trans_pk}"
         # 'subcategories_exist' is used in Transaction Create view to display
         # a tooltip if the user has no subcategories. This can be disregarded
         # in the Transaction Update View.
@@ -877,8 +970,9 @@ class TransactionUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView)
             return reverse_lazy('budget:transaction_list')
 
     def test_func(self, *args, **kwargs):
-        # If a user manually enters a value in the url for <int:pk>, this makes sure the id of the Transaction they
-        #    are updating is associated with their User Account.
+        # If a user manually enters a value in the url for <int:pk>, this
+        # makes sure the id of the Transaction they are updating is
+        # associated with their User Account.
         user_month_ids = [
             i.id for i in Month.objects.filter(user=self.request.user)]
         user_category_ids = [i.id for i in Category.objects.filter(
@@ -901,6 +995,19 @@ class TransactionListView(LoginRequiredMixin, ListView):
         context = super().get_context_data(**kwargs)
         context['title'] = 'Transactions'
 
+        # If user_transactions is empty, the user has no transactions and the
+        #     table will not be displayed.
+        user_month_ids = [
+            i.id for i in Month.objects.filter(user=self.request.user)]
+        user_category_ids = [i.id for i in Category.objects.filter(
+            month_id__in=user_month_ids)]
+        user_subcategory_ids = [i.id for i in SubCategory.objects.filter(
+            category_id__in=user_category_ids)]
+        user_transaction_ids = [i.id for i in Transaction.objects.filter(
+            subcategory_id__in=user_subcategory_ids)]
+        context['transactions_exist'] = user_transaction_ids
+
+        # Generates data displayed on Table.
         user_months = [i.id for i in Month.objects.filter(
             user=self.request.user
         ).order_by('-year', '-month')]
@@ -936,17 +1043,18 @@ class TransactionListView(LoginRequiredMixin, ListView):
                 'year': month_ref.year,
                 'transactions': transactions,
             })
-
-        # If user_transactions is empty, the user has no transactions and the
-        #     table will not be displayed.
-        context['transactions_exist'] = True
         context['transaction_data'] = transaction_data
+
         # source is used to route back button in Navbar.
         context['source'] = 'list_view'
         return context
 
 
-class TransactionDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
+class TransactionDeleteView(
+    LoginRequiredMixin,
+    UserPassesTestMixin,
+    DeleteView
+):
     """Deletes User Transactions."""
     model = Transaction
     template_name = 'budget/transaction_delete.html'
@@ -969,8 +1077,9 @@ class TransactionDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView)
         return context
 
     def test_func(self, *args, **kwargs):
-        # If a user manually enters a value in the url for <int:pk>, this makes sure the id of the Transaction they
-        #    are updating is associated with their User Account.
+        # If a user manually enters a value in the url for <int:pk>, this
+        # makes sure the id of the Transaction they are updating is
+        # associated with their User Account.
         user_month_ids = [
             i.id for i in Month.objects.filter(user=self.request.user)]
         user_category_ids = [i.id for i in Category.objects.filter(
