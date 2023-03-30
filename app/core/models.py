@@ -91,7 +91,7 @@ class Month(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     month = models.IntegerField(
         validators=[MinValueValidator(1), MaxValueValidator(12)])
-    year = models.IntegerField(max_length=4)
+    year = models.IntegerField()
 
     def __str__(self):
         return f"{self.month}/{self.year}"
