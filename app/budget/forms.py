@@ -143,9 +143,8 @@ class TransactionForm(LoginRequiredMixin, forms.ModelForm):
         )
         # Label format: '[Category name] - [Subcategory name]'
         self.fields['subcategory'].choices = (
-            (subcategory.id,
-             f"{Category.objects.get(id=subcategory.category_id)} - {subcategory}")
-            for subcategory in subcategories
+            (s.id, f"{Category.objects.get(id=s.category_id)} - {s}")
+            for s in subcategories
         )
         self.fields['account'].choices = [
             (account.id, account.name) for account in Account.objects.filter(
