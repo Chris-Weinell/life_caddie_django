@@ -831,12 +831,25 @@ class TransactionUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView)
     success_url = reverse_lazy('budget:budget_dashboard')
 
     def get_initial(self, *args, **kwargs):
+        id = self.kwargs['pk']
+        transaction = Transaction.objects.get(id=id)
+        subcategory = SubCategory.objects.get(
+            id=transaction.subcategory.id
+        )
+        category = Category.objects.get(
+            id=subcategory.category.id
+        )
+        month = Month.objects.get(
+            id=category.month.id
+        )
+        print(month)
         initial = {
             'user': self.request.user,
-            'month': self.request.session['date']['month'],
-            'year': self.request.session['date']['year'],
+            'month': month.month,
+            'year': month.year,
             'subcategory': self.kwargs['subcategory_id']
         }
+        print(initial)
         return initial
 
     def get_context_data(self, *args, **kwargs):
@@ -887,39 +900,46 @@ class TransactionListView(LoginRequiredMixin, ListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['title'] = 'Transactions'
-        user_months = Month.objects.filter(user=self.request.user)
-        user_categories = Category.objects.filter(month__in=user_months)
-        user_subcategories = SubCategory.objects.filter(
-            category__in=user_categories)
-        user_transactions = Transaction.objects.filter(
-            subcategory__in=user_subcategories).order_by('-date', 'id')
-        transaction_data = list(user_months.values())
-        for month in transaction_data:
-            # This generates each month's Table Header
-            month['name'] = month_reference_dict_full[month['month']]
-            month['year'] = month['year']
-            # This captures data from all user transactions which are displayed in the list view.
-            month['transactions'] = [transaction for transaction in user_transactions if transaction.date.month ==
-                                     month['month'] and transaction.date.year == month['year']]
-            for transaction in month['transactions']:
-                # Captures subcategory data to be displayed on Table.
+
+        user_months = [i.id for i in Month.objects.filter(
+            user=self.request.user
+        ).order_by('-year', '-month')]
+        transaction_data = []
+        for month in user_months:
+            categories = Category.objects.filter(
+                month_id=month
+            ).order_by('id')
+            subcategories = SubCategory.objects.filter(
+                category__in=categories
+            ).order_by('id')
+            transactions = Transaction.objects.filter(
+                subcategory__in=subcategories
+            ).order_by('-date', 'id')
+            for transaction in transactions:
                 transaction.subcategory = SubCategory.objects.get(
                     id=transaction.subcategory.id
                 )
-                # Captures Category data to be displayed on Table.
                 transaction.category = Category.objects.get(
                     id=transaction.subcategory.category_id
                 )
-                # Captures Account data to be displayed on Table if it exists.
                 if transaction.account:
                     transaction.account = Account.objects.get(
-                        id=transaction.account_id)
-                # Converts Expenses and Savings Deposits to be displayed as negatives.
+                        id=transaction.account_id
+                    )
                 if transaction.expense:
                     transaction.amount = 0-transaction.amount
+            month_ref = Month.objects.get(
+                id=month
+            )
+            transaction_data.append({
+                'name': month_reference_dict_full[month_ref.month],
+                'year': month_ref.year,
+                'transactions': transactions,
+            })
+
         # If user_transactions is empty, the user has no transactions and the
         #     table will not be displayed.
-        context['transactions_exist'] = user_transactions
+        context['transactions_exist'] = True
         context['transaction_data'] = transaction_data
         # source is used to route back button in Navbar.
         context['source'] = 'list_view'
