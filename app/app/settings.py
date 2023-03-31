@@ -122,11 +122,14 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.1/howto/static-files/
 
+# 'vol/web/static must be served by nginx at '/static/'
+# Allows us to refer to vol/web/static/style.css at /static/style.css.
+
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'static'),
 ]
-STATIC_ROOT = '/vol/static'
+STATIC_ROOT = '/vol/web/static'
 
 # STATIC_URL = '/static/static/'
 # STATIC_ROOT = '/vol/web/static'
