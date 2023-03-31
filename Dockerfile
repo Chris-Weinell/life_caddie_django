@@ -31,7 +31,8 @@ RUN python -m venv /py && \
     django-user && \
     # mkdir -p /vol/web/static && \
     mkdir -p /var/www/static && \
-    chown -R django-user:django-user /vol && \
+    # chown -R django-user:django-user /vol && \
+    chown -R django-user:django-user /var && \
     chmod -R 755 /vol && \
     chmod -R +x /scripts
 
