@@ -3,7 +3,7 @@ server {
     server_name 3.18.88.24;
 
     location /static {
-        alias /vol/static;
+        alias /var/www/static;
     }
 
     location / {
