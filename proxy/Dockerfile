@@ -1,8 +1,6 @@
 FROM nginxinc/nginx-unprivileged:1-alpine
 LABEL maintainer="Chris Weinell"
 
-COPY ./SSL_CERT_KEY.pem /etc/nginx/SSL_CERT_KEY.pem
-COPY ./SSL_CERT.pem /etc/nginx/SSL_CERT.pem
 COPY ./default.conf.tpl /etc/nginx/default.conf.tpl
 COPY ./uwsgi_params /etc/nginx/uwsgi_params
 COPY ./run.sh /run.sh
@@ -16,12 +14,7 @@ USER root
 RUN mkdir -p /var/www/static && \
     chmod 755 /var/www/static && \    
     touch /etc/nginx/conf.d/default.conf && \
-    chown nginx:nginx /etc/nginx/conf.d/default.conf && \    
-    mkdir -p /etc/letsencrypt/live/yourlifecaddie.com && \
-    touch /etc/letsencrypt/live/yourlifecaddie.com/fullchain.pem && \
-    touch /etc/letsencrypt/live/yourlifecaddie.com/privkey.pem && \
-    chown nginx:nginx /etc/letsencrypt/live/yourlifecaddie.com/fullchain.pem && \
-    chown nginx:nginx /etc/letsencrypt/live/yourlifecaddie.com/privkey.pem && \
+    chown nginx:nginx /etc/nginx/conf.d/default.conf && \
     chmod +x /run.sh
 
 VOLUME /var/www/static

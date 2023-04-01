@@ -264,6 +264,3 @@ poetry.toml
 pyrightconfig.json
 
 # End of https://www.toptal.com/developers/gitignore/api/python,django
-
-SSL_CERT_KEY.pem
-SSL_CERT.pem
