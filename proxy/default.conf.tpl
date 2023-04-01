@@ -10,8 +10,8 @@ server {
     listen 443 ssl;
     server_name yourlifecaddie.com;
 
-    ssl_certificate ${SSL_CERT};
-    ssl_certificate_key ${SSL_CERT_KEY};
+    ssl_certificate "/etc/letsencrypt/live/yourlifecaddie.com/fullchain.pem";
+    ssl_certificate_key "/etc/letsencrypt/live/yourlifecaddie.com/privkey.pem";
 
     location /static {
         alias /var/www/static;
