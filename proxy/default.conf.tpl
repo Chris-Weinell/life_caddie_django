@@ -1,6 +1,6 @@
 server {
     listen ${LISTEN_PORT};
-    server_name 3.18.88.24;
+    server_name yourlifecaddie.com;
     
     # Redirect HTTP to HTTPS
     return 301 https://$server_name$request_uri;
@@ -8,10 +8,10 @@ server {
 
 server {
     listen 443 ssl;
-    server_name 3.18.88.24;
+    server_name yourlifecaddie.com;
 
-    ssl_certificate /etc/letsencrypt/live/yourlifecaddie.com/fullchain.pem;
-    ssl_certificate_key /etc/letsencrypt/live/yourlifecaddie.com/privkey.pem;
+    ssl_certificate ${SSL_CERT};
+    ssl_certificate_key ${SSL_CERT_KEY};
 
     location /static {
         alias /var/www/static;
