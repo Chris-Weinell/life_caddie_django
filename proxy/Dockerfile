@@ -12,9 +12,11 @@ ENV APP_PORT=9000
 USER root
 
 RUN mkdir -p /var/www/static && \
-    chmod 755 /var/www/static && \    
+    chmod 755 /var/www/static && \  
     touch /etc/nginx/conf.d/default.conf && \
     chown nginx:nginx /etc/nginx/conf.d/default.conf && \
+    mkdir -p /etc/letsencrypt/live/yourlifecaddie.com && \  
+    chown nginx:nginx /etc/letsencrypt/live/yourlifecaddie.com && \
     chmod +x /run.sh
 
 VOLUME /var/www/static
