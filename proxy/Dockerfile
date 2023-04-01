@@ -16,7 +16,11 @@ RUN mkdir -p /var/www/static && \
     touch /etc/nginx/conf.d/default.conf && \
     chown nginx:nginx /etc/nginx/conf.d/default.conf && \
     mkdir -p /etc/letsencrypt/live/yourlifecaddie.com && \  
+    touch /etc/letsencrypt/live/yourlifecaddie.com/fullchain.pem && \  
+    touch /etc/letsencrypt/live/yourlifecaddie.com/privkey.pem && \  
     chown nginx:nginx /etc/letsencrypt/live/yourlifecaddie.com && \
+    chown nginx:nginx /etc/letsencrypt/live/yourlifecaddie.com/fullchain.pem && \
+    chown nginx:nginx /etc/letsencrypt/live/yourlifecaddie.com/privkey.pem && \
     chmod +x /run.sh
 
 VOLUME /var/www/static
