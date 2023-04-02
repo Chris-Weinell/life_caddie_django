@@ -8,6 +8,8 @@ services:
     volumes:
       - static-data:/var/www/static
       - cert-data:/etc/letsencrypt/live/yourlifecaddie.com
+    env_file:
+      - .env
     environment:
       - DB_HOST=db
       - DB_NAME=${DB_NAME}
