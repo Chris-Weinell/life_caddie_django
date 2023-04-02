@@ -50,14 +50,6 @@ services:
     volumes:
       - static-data:/var/www/static
       - cert-data:/etc/letsencrypt/live/yourlifecaddie.com
-    environment:
-      - CERT1=${CERT1}
-      - CHAIN1=${CHAIN1}
-      - CHAIN2=${CHAIN2}
-      - FULLCHAIN1=${FULLCHAIN1}
-      - FULLCHAIN2=${FULLCHAIN2}
-      - FULLCHAIN3=${FULLCHAIN3}
-      - PRIVKEY1=${PRIVKEY1}
 
 volumes:
   postgres-data:

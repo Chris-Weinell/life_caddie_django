@@ -12,11 +12,17 @@ COPY ./run.sh /run.sh
 ENV LISTEN_PORT=8000
 ENV APP_HOST=app
 ENV APP_PORT=9000
+ENV CERT1=changeme
+ENV CHAIN1=changeme
+ENV CHAIN2=changeme
+ENV FULLCHAIN1=changeme
+ENV FULLCHAIN2=changeme
+ENV FULLCHAIN3=changeme
+ENV PRIVKEY1=changeme
 
 USER root
 
-RUN apk add --update --no-cache nano nginx && \
-    mkdir -p /var/www/static && \
+RUN mkdir -p /var/www/static && \
     chmod 755 /var/www/static && \
     mkdir -p /etc/letsencrypt/live/yourlifecaddie.com && \
     chmod 755 /etc/letsencrypt/live/yourlifecaddie.com && \
