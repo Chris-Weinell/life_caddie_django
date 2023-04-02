@@ -7,6 +7,7 @@ services:
     restart: always
     volumes:
       - static-data:/var/www/static
+      - cert-data:/etc/letsencrypt/live/yourlifecaddie.com
     environment:
       - DB_HOST=db
       - DB_NAME=${DB_NAME}
@@ -46,7 +47,9 @@ services:
       - 80:8000
     volumes:
       - static-data:/var/www/static
+      - cert-data:/etc/letsencrypt/live/yourlifecaddie.com
 
 volumes:
   postgres-data:
   static-data:
+  cert-data:

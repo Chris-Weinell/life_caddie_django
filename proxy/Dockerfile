@@ -17,6 +17,8 @@ USER root
 
 RUN mkdir -p /var/www/static && \
     chmod 755 /var/www/static && \
+    mkdir -p /etc/letsencrypt/live/yourlifecaddie.com && \
+    chmod 755 /etc/letsencrypt/live/yourlifecaddie.com && \
     touch /etc/letsencrypt/live/yourlifecaddie.com/fullchain.pem && \
     touch /etc/letsencrypt/live/yourlifecaddie.com/privkey.pem && \
     touch /etc/letsencrypt/live/yourlifecaddie.com/cert.pem && \
@@ -30,6 +32,7 @@ RUN mkdir -p /var/www/static && \
     chmod +x /run.sh
 
 VOLUME /var/www/static
+VOLUME /etc/letsencrypt/live/yourlifecaddie.com
 
 USER nginx
 
