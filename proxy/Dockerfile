@@ -12,11 +12,11 @@ COPY ./run.sh /run.sh
 ENV LISTEN_PORT=8000
 ENV APP_HOST=app
 ENV APP_PORT=9000
-ENV FULLCHAIN1=test
 
 USER root
 
-RUN mkdir -p /var/www/static && \
+RUN apk add --update --no-cache nano && \
+    mkdir -p /var/www/static && \
     chmod 755 /var/www/static && \
     mkdir -p /etc/letsencrypt/live/yourlifecaddie.com && \
     chmod 755 /etc/letsencrypt/live/yourlifecaddie.com && \
