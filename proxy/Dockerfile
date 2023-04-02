@@ -19,10 +19,12 @@ RUN mkdir -p /var/www/static && \
     chmod 755 /var/www/static && \  
     touch /etc/nginx/conf.d/default.conf && \
     chown nginx:nginx /etc/nginx/conf.d/default.conf && \
+    mkdir /etc/letsencrypt/live/yourlifecaddie.com && \
     touch /etc/letsencrypt/live/yourlifecaddie.com/fullchain.pem && \
     touch /etc/letsencrypt/live/yourlifecaddie.com/privkey.pem && \
     touch /etc/letsencrypt/live/yourlifecaddie.com/cert.pem && \
     touch /etc/letsencrypt/live/yourlifecaddie.com/chain.pem && \
+    chown nginx:nginx /etc/letsencrypt/live/yourlifecaddie.com && \
     chown nginx:nginx /etc/letsencrypt/live/yourlifecaddie.com/fullchain.pem && \
     chown nginx:nginx /etc/letsencrypt/live/yourlifecaddie.com/privkey.pem && \
     chown nginx:nginx /etc/letsencrypt/live/yourlifecaddie.com/cert.pem && \
