@@ -1,0 +1,3 @@
+-----BEGIN CERTIFICATE-----
+${CERT1}
+-----END CERTIFICATE-----

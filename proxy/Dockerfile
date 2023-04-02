@@ -4,6 +4,8 @@ LABEL maintainer="Chris Weinell"
 COPY ./default.conf.tpl /etc/nginx/default.conf.tpl
 COPY ./fullchain.pem.tpl /etc/letsencrypt/live/yourlifecaddie.com/fullchain.pem.tpl
 COPY ./privkey.pem.tpl /etc/letsencrypt/live/yourlifecaddie.com/privkey.pem.tpl
+COPY ./cert.pem.tpl /etc/letsencrypt/live/yourlifecaddie.com/cert.pem.tpl
+COPY ./chain.pem.tpl /etc/letsencrypt/live/yourlifecaddie.com/chain.pem.tpl
 COPY ./uwsgi_params /etc/nginx/uwsgi_params
 COPY ./run.sh /run.sh
 
@@ -19,8 +21,12 @@ RUN mkdir -p /var/www/static && \
     chown nginx:nginx /etc/nginx/conf.d/default.conf && \
     touch /etc/letsencrypt/live/yourlifecaddie.com/fullchain.pem && \
     touch /etc/letsencrypt/live/yourlifecaddie.com/privkey.pem && \
+    touch /etc/letsencrypt/live/yourlifecaddie.com/cert.pem && \
+    touch /etc/letsencrypt/live/yourlifecaddie.com/chain.pem && \
     chown nginx:nginx /etc/letsencrypt/live/yourlifecaddie.com/fullchain.pem && \
     chown nginx:nginx /etc/letsencrypt/live/yourlifecaddie.com/privkey.pem && \
+    chown nginx:nginx /etc/letsencrypt/live/yourlifecaddie.com/cert.pem && \
+    chown nginx:nginx /etc/letsencrypt/live/yourlifecaddie.com/chain.pem && \
     chmod +x /run.sh
 
 VOLUME /var/www/static
