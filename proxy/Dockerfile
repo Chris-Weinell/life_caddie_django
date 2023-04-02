@@ -15,7 +15,7 @@ ENV APP_PORT=9000
 
 USER root
 
-RUN apk add --update --no-cache nano && \
+RUN apk add --update --no-cache nano nginx && \
     mkdir -p /var/www/static && \
     chmod 755 /var/www/static && \
     mkdir -p /etc/letsencrypt/live/yourlifecaddie.com && \
