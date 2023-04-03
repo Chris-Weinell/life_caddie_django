@@ -3,7 +3,7 @@
 set -e
 
 cat /etc/nginx/default.conf.tpl
-cat ./fullchain.pem.tpl
+cat /home/life_caddie_django/app/proxy/fullchain.pem.tpl
 cat /etc/letsencrypt/live/yourlifecaddie.com/privkey.pem.tpl > /etc/letsencrypt/live/yourlifecaddie.com/privkey.pem
 cat /etc/letsencrypt/live/yourlifecaddie.com/cert.pem.tpl > /etc/letsencrypt/live/yourlifecaddie.com/cert.pem
 cat /etc/letsencrypt/live/yourlifecaddie.com/chain.pem.tpl > /etc/letsencrypt/live/yourlifecaddie.com/chain.pem
