@@ -1,6 +1,1 @@
------BEGIN CERTIFICATE-----
-${CHAIN1}
------END CERTIFICATE-----
------BEGIN CERTIFICATE-----
-${CHAIN2}
------END CERTIFICATE-----
+changeme

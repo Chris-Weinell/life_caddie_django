@@ -1,3 +1,1 @@
------BEGIN PRIVATE KEY-----
-${PRIVKEY1}
------END PRIVATE KEY-----
+changeme
