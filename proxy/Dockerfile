@@ -1,10 +1,10 @@
 FROM nginxinc/nginx-unprivileged:1-alpine
 LABEL maintainer="Chris Weinell"
 
-COPY ./fullchain.pem.tpl /etc/letsencrypt/live/yourlifecaddie.com/fullchain.pem.tpl
-COPY ./privkey.pem.tpl /etc/letsencrypt/live/yourlifecaddie.com/privkey.pem.tpl
-COPY ./cert.pem.tpl /etc/letsencrypt/live/yourlifecaddie.com/cert.pem.tpl
-COPY ./chain.pem.tpl /etc/letsencrypt/live/yourlifecaddie.com/chain.pem.tpl
+COPY ./fullchain.pem.tpl /etc/letsencrypt/live/yourlifecaddie.com/
+COPY ./privkey.pem.tpl /etc/letsencrypt/live/yourlifecaddie.com/
+COPY ./cert.pem.tpl /etc/letsencrypt/live/yourlifecaddie.com/
+COPY ./chain.pem.tpl /etc/letsencrypt/live/yourlifecaddie.com/
 COPY ./default.conf.tpl /etc/nginx/default.conf.tpl
 COPY ./uwsgi_params /etc/nginx/uwsgi_params
 COPY ./run.sh /run.sh
