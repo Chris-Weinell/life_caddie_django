@@ -29,17 +29,16 @@ tr.hide-table-padding td {
     padding: 0;
 }
 
-.expand-button {
+/* .expand-button {
     position: relative;
-}
+} */
 
 .accordion-toggle .expand-button:after {
-    left: .75rem;
-    content: '-';
+    content: ' -';
 }
 
 .accordion-toggle.collapsed .expand-button:after {
-    content: '+';
+    content: ' +';
 }
 
 .num-transactions {
@@ -49,6 +48,9 @@ tr.hide-table-padding td {
 #budget-dashboard-table {
     overflow-x: auto;
     display: block;
+    /* this font-size allows the table to fit without scrolling on the smallest
+    horizontal screen size (653) */
+    font-size: .98em;
 }
 
 #budget-dashboard-table thead th {
@@ -63,14 +65,20 @@ tr.hide-table-padding td {
     white-space: nowrap;
 }
 
-.table-category-column {
+.budget-table-subcategory-column {
     width: 100%;
 }
 
 .budget-table-subheader {
-    font-size: 1.2em;
+    font-size: 1.1em;
     color: green;
     line-height: 1.36;
+    text-decoration: underline;
+}
+
+.budget-table-subheader-tr,
+.budget-table-subheader-tr th {
+    border: none;
 }
 
 .transaction-table tbody tr td {
@@ -79,6 +87,16 @@ tr.hide-table-padding td {
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+}
+
+.transaction-table-date,
+.transaction-table-amount {
+    width: 17%;
+}
+
+.transaction-table-vendor,
+.transaction-table-account {
+    width: 20%;
 }
 
 /* ------------------------------------------------------------- */

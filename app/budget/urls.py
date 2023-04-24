@@ -11,6 +11,7 @@ app_name = 'budget'
 #  are created from within Transaction Views.
 urlpatterns = [
     path('', views.budget_dashboard, name='budget_dashboard'),
+    path('budget_table/', views.budget_table, name='budget_table'),
     path(
         'month/',
         views.FirstMonthCreateView.as_view(),
