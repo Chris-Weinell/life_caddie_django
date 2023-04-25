@@ -25,73 +25,7 @@ def my_reverse(viewname, kwargs=None, additional=None):
 
     return url
 
-
-@login_required
-def budget_dashboard(request):
-    """
-    Generates User Budget Dashboard.
-    """
-
-    if request.method == 'POST':
-        form = forms.MonthSelectForm(request.POST)
-        if form.is_valid():
-            # Updates month_year session data values.
-            date_data = form.cleaned_data['month_year'].split('-')
-            request.session['date'] = {
-                'month': int(date_data[0]),
-                'year': int(date_data[1])
-            }
-    else:
-        form = forms.MonthSelectForm()
-
-        # This sets month/year data equal to the current month/year in
-        # the event that there is not sessions data for these values
-        # or if an associated Object for the current month does not
-        # exist.  This will occur when the user clicks 'Cancel' on
-        # the Create New Month screen.
-        if 'date' not in request.session or \
-                not Month.objects.filter(
-                    user=request.user,
-                    month=request.session['date']['month'],
-                    year=request.session['date']['year']
-                ).exists():
-            current_month = datetime.now().month
-            current_year = datetime.now().year
-
-            request.session['date'] = {
-                'month': current_month,
-                'year': current_year
-            }
-
-    # This logic checks to see if the logged in user has created any
-    # Months to attach a budget to. If they have not, it redirects
-    # them to the page to create their first month.
-    budgets_exist = Month.objects.filter(user=request.user)
-    if not budgets_exist:
-        return HttpResponseRedirect(reverse('budget:first_month'))
-
-    month_exists = Month.objects.filter(
-        user=request.user,
-        month=request.session['date']['month'],
-        year=request.session['date']['year']
-    )
-    if not month_exists:
-        return HttpResponseRedirect(reverse('budget:new_month'))
-
-    # If there was no session data on page load, default login
-    # values for Month and Year will be the current month and year.
-    form_month = request.session['date']['month']
-    form_year = request.session['date']['year']
-    form.fields['month_year'].initial = f"{form_month}-{form_year}"
-
-    # limits month_year choices to current year and next year.
-    form.fields['month_year'].choices = [
-        (f"{month}-{year}", f"{month_reference_dict[month]}, {year}")
-        for year in range(datetime.now().year, datetime.now().year + 2)
-        for month in range(1, 13)
-    ]
-
-    ##########################################################
+def collect_dashboard_table_data(request):
     # This generates data that is displayed on the Cards section of the page.
 
     # This creates a list of the Categories associated with
@@ -373,24 +307,116 @@ def budget_dashboard(request):
     elif over_under < 0:
         totals_reference['over_under'] = f"{abs(over_under)} Over Budget!"
     else:
-        totals_reference['over_under'] = ''
+        totals_reference['over_under'] = 'Right on Budget!'
 
-    ##############################################################
-
-    month = month_reference_dict_full[request.session['date']['month']]
-    year = request.session['date']['year']
-    context = {
-        'form': form,
+    data = {
         'categories': categories,
         'table_reference': table_reference,
         'totals_reference': totals_reference,
+    }
+    return data
+        
+
+@login_required
+def budget_dashboard(request):
+    """
+    Generates User Budget Dashboard.
+    """
+
+    if request.method == 'POST':
+        form = forms.MonthSelectForm(request.POST)
+        if form.is_valid():
+            # Updates month_year session data values.
+            date_data = form.cleaned_data['month_year'].split('-')
+            request.session['date'] = {
+                'month': int(date_data[0]),
+                'year': int(date_data[1])
+            }
+    else:
+        form = forms.MonthSelectForm()
+
+        # This sets month/year data equal to the current month/year in
+        # the event that there is not sessions data for these values
+        # or if an associated Object for the current month does not
+        # exist.  This will occur when the user clicks 'Cancel' on
+        # the Create New Month screen.
+        if 'date' not in request.session or \
+                not Month.objects.filter(
+                    user=request.user,
+                    month=request.session['date']['month'],
+                    year=request.session['date']['year']
+                ).exists():
+            current_month = datetime.now().month
+            current_year = datetime.now().year
+
+            request.session['date'] = {
+                'month': current_month,
+                'year': current_year
+            }
+
+    # This logic checks to see if the logged in user has created any
+    # Months to attach a budget to. If they have not, it redirects
+    # them to the page to create their first month.
+    budgets_exist = Month.objects.filter(user=request.user)
+    if not budgets_exist:
+        return HttpResponseRedirect(reverse('budget:first_month'))
+
+    month_exists = Month.objects.filter(
+        user=request.user,
+        month=request.session['date']['month'],
+        year=request.session['date']['year']
+    )
+    if not month_exists:
+        return HttpResponseRedirect(reverse('budget:new_month'))
+
+    # If there was no session data on page load, default login
+    # values for Month and Year will be the current month and year.
+    form_month = request.session['date']['month']
+    form_year = request.session['date']['year']
+    form.fields['month_year'].initial = f"{form_month}-{form_year}"
+
+    # limits month_year choices to current year and next year.
+    form.fields['month_year'].choices = [
+        (f"{month}-{year}", f"{month_reference_dict[month]}, {year}")
+        for year in range(datetime.now().year-2, datetime.now().year + 3)
+        for month in range(1, 13)
+    ]
+
+    month = month_reference_dict_full[request.session['date']['month']]
+    year = request.session['date']['year']
+    month_id = Month.objects.get(
+        user = request.user,
+        month = request.session['date']['month'],
+        year = request.session['date']['year']
+    ).id
+    data = collect_dashboard_table_data(request)
+    context = {
+        'form': form,
+        'categories': data['categories'],
+        'table_reference': data['table_reference'],
+        'totals_reference': data['totals_reference'],
         'month': month,
         'year': year,
+        'month_id': month_id,
         'source': 'dashboard',
         'title': 'Budget Dashboard',
     }
 
     return render(request, 'budget/budget.html', context=context)
+
+
+def budget_table(request):
+    month = month_reference_dict_full[request.session['date']['month']]
+    year = request.session['date']['year']
+    data = collect_dashboard_table_data(request)
+    context = {
+        'categories': data['categories'],
+        'table_reference': data['table_reference'],
+        'totals_reference': data['totals_reference'],
+        'month': month,
+        'year': year,
+    }
+    return render(request, 'budget/budget_table.html', context=context)
 
 
 class FirstMonthCreateView(
@@ -527,6 +553,38 @@ class NewMonthCreateView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
                 user=form.cleaned_data['user']
             )
         return HttpResponseRedirect(reverse('budget:budget_dashboard'))
+    
+
+class MonthDeleteView(
+    LoginRequiredMixin,
+    UserPassesTestMixin,
+    DeleteView
+):
+    """Deletes User Months."""
+    model = Month
+    template_name = 'budget/month_delete.html'
+    success_url = reverse_lazy('budget:budget_dashboard')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['title'] = 'Delete Month'
+        context['month_id'] = self.kwargs['pk']
+        context['month'] = Month.objects.get(
+            id=context['month_id'])
+        context['month_name'] = month_reference_dict_full[
+            context['month'].month
+        ]
+        context['year'] = context['month'].year
+        return context
+
+    def test_func(self, *args, **kwargs):
+        # Verifies month is associated with logged in user
+        # if the url is manually updated.
+        user_month_ids = [
+            i.id for i in Month.objects.filter(user=self.request.user)]
+        if self.kwargs['pk'] not in user_month_ids:
+            return False
+        return True
 
 
 class AccountCreateView(LoginRequiredMixin, CreateView):

@@ -20,20 +20,26 @@
   {% block content %}
   <div class="container">
 
-    <div class="row mb-0 mb-xl-4 mt-2">
-      <div class="col-12 d-flex flex-column flex-lg-row justify-content-around col-lg-10 mx-lg-auto col-xl-12">
-        <a class="lead btn btn-outline-success btn-lg mb-3 mb-lg-0" href="{% url 'budget:account' source %}">Create Account</a>
-        <a class="lead btn btn-outline-success btn-lg mb-3 mb-lg-0" href="{% url 'budget:account_list' %}">Edit Accounts</a>         
-        <a class="lead btn btn-outline-success btn-lg mb-3 mb-lg-0" href="{% url 'budget:transaction' %}">Add Transaction</a>
-        <a class="lead btn btn-outline-success btn-lg" href="{% url 'budget:transaction_list' %}">View All Transactions</a>
+    <div class="row mb-0 mb-lg-4 mt-2">
+      <div class="col-12 d-flex flex-column flex-lg-row justify-content-around col-lg-12 mx-lg-auto">
+        <a class="budget-banner-link lead btn btn-outline-success btn-lg mb-3 mb-lg-0" href="{% url 'budget:account' source %}">Add/Edit Account</a>
+        {% comment %} <a class="lead btn btn-outline-success btn-lg mb-3 mb-lg-0" href="{% url 'budget:account_list' %}">Edit Accounts</a>{% endcomment %}
+        <a class="budget-banner-link lead btn btn-outline-success btn-lg mb-3 mb-lg-0" href="{% url 'budget:category' %}">Add Category</a>
+        <a class="budget-banner-link lead btn btn-outline-success btn-lg mb-3 mb-lg-0" href="{% url 'budget:transaction' %}">Add Transaction</a>
+        
+        <a class="d-lg-none budget-banner-link lead btn btn-outline-success btn-lg mb-3 mb-lg-0" href="{% url 'budget:transaction_list' %}">View All Transactions</a>
+        <a class="d-lg-none budget-banner-link lead btn btn-outline-success btn-lg" href="{% url 'budget:budget_table' %}">View Budget Table</a>
+      
+        <a class="d-none d-lg-inline budget-banner-link lead btn btn-outline-success btn-lg" href="{% url 'budget:transaction_list' %}">View All Transactions</a>
+               
+      </div>
+      <div class="d-flex mt-4">
+        <h2 class="over-under mx-auto mb-0">{{totals_reference.over_under}}</h2>
       </div>
     </div>
 
     <div class="row">    
-      <div id="budget-categories" class="col-12 col-lg-10 mx-lg-auto g-4 col-xl-4 text-start mt-0">
-        <div class="d-flex">
-          <h4 class="mx-auto my-4 my-xl-2">{{totals_reference.over_under}}</h4>
-        </div>
+       <div id="budget-categories" class="col-12 mx-lg-auto g-4 col-lg-4 text-start">
         {% for category in categories %}
           <div class="card mb-2">
             <div class="card-body">
@@ -61,21 +67,24 @@
           </div>
         {% endfor %}
         <ul>
-          <li><a href="{% url 'budget:category' %}">Add Category</a></li>      
+          <li><a href="{% url 'budget:category' %}">Add Category</a></li>
         </ul>
       </div> 
 
-      <div class="col-12 col-xl-8 d-none d-md-flex flex-column mt-2 mt-lg-0">
+      <div class="col-12 col-lg-8 d-none d-lg-flex flex-column mt-2 mt-lg-0">
         <div class="align-self-md-center">
           {% include './budget_table_content.html' %}
         </div>
       </div>
-
-      <div class="d-block d-md-none">
-        <p>test</p>
-      </div>
     
     </div>
+
+    <div class="row">
+      <div class="col-12 d-flex">
+        <a class="btn btn-outline-danger btn-lg mx-auto mt-4 scary-delete-button" href="{% url 'budget:delete_month' month_id%}"><b>Delete Month</b></a>
+      </div>
+    </div>
+
   </div>
 
 {% endblock %}

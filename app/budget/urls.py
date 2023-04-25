@@ -23,6 +23,11 @@ urlpatterns = [
         name='new_month'
     ),
     path(
+        'delete_month/<int:pk>',
+        views.MonthDeleteView.as_view(),
+        name='delete_month'
+    ),
+    path(
         'account/<str:source>',
         views.AccountCreateView.as_view(),
         name='account'

@@ -57,36 +57,36 @@
         <form class="mt-3" action="", method="POST">
             {% csrf_token %}
             <div class="mb-3">
-                <label class="form-label" for="subcategory">Subcategory</label>
+                <label class="form-label" for="subcategory"><strong>Subcategory</strong></label>
                 {{form.subcategory}}
             </div>
             <div class="mb-3">
-                <label class="form-label" for="expense">Transaction Category</label>
+                <label class="form-label" for="expense"><strong>Transaction Category</strong></label>
                 {{form.expense}}
             </div>
             <div class="mb-3">
                 <label class="form-label" for="account">
-                    Account
+                    <strong>Account</strong>
                     <a href="{% url 'budget:account' source %}?vals={{vals}}">(Create New Account)</a>
                 </label>
                 {{form.account}}
             </div>
             <div class="row">
                 <div class="mb-3 col-12 col-sm-6">
-                    <label class="form-label" for="amount">Amount</label>
+                    <label class="form-label" for="amount"><strong>Amount</strong></label>
                     {{form.amount}}
                 </div>
                 <div class="mb-3 col-12 col-sm-6">
-                    <label class="form-label" for="date">Date</label>
+                    <label class="form-label" for="date"><strong>Date</strong></label>
                     {{form.date}}
                 </div>
             </div>
             <div class="mb-3">
-                <label class="form-label" for="vendor">Vendor</label>
+                <label class="form-label" for="vendor"><strong>Vendor</strong></label>
                 {{form.vendor}}
             </div>
             <div class="mb-3">
-                <label class="form-label" for="notes">Notes</label>
+                <label class="form-label" for="notes"><strong>Notes</strong></label>
                 {{form.notes}}
             </div>
             <input class="mt-1 btn btn-success" type="submit">
