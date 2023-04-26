@@ -16,11 +16,16 @@ a {
 
 body {
     font-family: 'Roboto', sans-serif;
+    background-color: #F8F9FA;
 }
 
 input[type=checkbox][disabled] {
     background-color: green;
     opacity: 1;
+}
+
+.scary-delete-button {
+    border: none;
 }
 
 /* ------------------------------------------------------------- */
@@ -29,17 +34,16 @@ tr.hide-table-padding td {
     padding: 0;
 }
 
-.expand-button {
+/* .expand-button {
     position: relative;
-}
+} */
 
 .accordion-toggle .expand-button:after {
-    left: .75rem;
-    content: '-';
+    content: ' -';
 }
 
 .accordion-toggle.collapsed .expand-button:after {
-    content: '+';
+    content: ' +';
 }
 
 .num-transactions {
@@ -49,6 +53,9 @@ tr.hide-table-padding td {
 #budget-dashboard-table {
     overflow-x: auto;
     display: block;
+    /* this font-size allows the table to fit without scrolling on the smallest
+    horizontal screen size (653) */
+    font-size: .98em;
 }
 
 #budget-dashboard-table thead th {
@@ -63,14 +70,19 @@ tr.hide-table-padding td {
     white-space: nowrap;
 }
 
-.table-category-column {
+.budget-table-subcategory-column {
     width: 100%;
 }
 
 .budget-table-subheader {
-    font-size: 1.2em;
+    font-size: 1.4em;
     color: green;
     line-height: 1.36;
+    /* text-decoration: underline; */
+}
+
+.budget-table-subheader-tr th {
+    border: none;
 }
 
 .transaction-table tbody tr td {
@@ -79,6 +91,16 @@ tr.hide-table-padding td {
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+}
+
+.transaction-table-date,
+.transaction-table-amount {
+    width: 17%;
+}
+
+.transaction-table-vendor,
+.transaction-table-account {
+    width: 20%;
 }
 
 /* ------------------------------------------------------------- */
@@ -127,19 +149,16 @@ tr.hide-table-padding td {
 
 #month_year_div::-webkit-scrollbar-track {
     -webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.1);
-    background-color: #F5F5F5;
     border-radius: 10px;
 }
 
 #month_year_div::-webkit-scrollbar {
     width: 10px;
     height: 8px;
-    background-color: #F5F5F5;
 }
 
 #month_year_div::-webkit-scrollbar-thumb {
     border-radius: 10px;
-    background-color: #FFF;
     background-image: -webkit-gradient(linear,
             40% 0%,
             75% 84%,
@@ -171,6 +190,17 @@ tr.hide-table-padding td {
 
 #budget-categories a {
     font-family: 'Roboto', sans-serif;
+}
+
+/* ------------------------------------------------------------- */
+/* Custom CSS for Budget Dashboard Top Links */
+
+@media(min-width:992px) {
+    .budget-banner-link {
+        width: 23%;
+        padding-left: 0px;
+        padding-right: 0px;
+    }
 }
 
 /* ------------------------------------------------------------- */
@@ -283,4 +313,15 @@ tr.hide-table-padding td {
     padding: .5em;
     line-height: 100%;
     margin-bottom: 15px;
+}
+
+/* ------------------------------------------------------------- */
+/* JS styling classes */
+
+.green {
+    color: green;
+}
+
+.red {
+    color: red;
 }

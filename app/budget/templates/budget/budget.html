@@ -20,17 +20,26 @@
   {% block content %}
   <div class="container">
 
-    <div class="row mb-0 mb-xl-4 mt-2">
-      <div class="col-12 d-flex flex-column flex-lg-row justify-content-around col-lg-10 mx-lg-auto col-xl-12">
-        <a class="lead btn btn-outline-success btn-lg mb-3 mb-lg-0" href="{% url 'budget:account' source %}">Create Account</a>
-        <a class="lead btn btn-outline-success btn-lg mb-3 mb-lg-0" href="{% url 'budget:account_list' %}">Edit Accounts</a>         
-        <a class="lead btn btn-outline-success btn-lg mb-3 mb-lg-0" href="{% url 'budget:transaction' %}">Add Transaction</a>
-        <a class="lead btn btn-outline-success btn-lg" href="{% url 'budget:transaction_list' %}">View All Transactions</a>
+    <div class="row mb-0 mb-lg-4 mt-2">
+      <div class="col-12 d-flex flex-column flex-lg-row justify-content-around col-lg-12 mx-lg-auto">
+        <a class="budget-banner-link lead btn btn-outline-success btn-lg mb-3 mb-lg-0" href="{% url 'budget:account' source %}">Add/Edit Account</a>
+        {% comment %} <a class="lead btn btn-outline-success btn-lg mb-3 mb-lg-0" href="{% url 'budget:account_list' %}">Edit Accounts</a>{% endcomment %}
+        <a class="budget-banner-link lead btn btn-outline-success btn-lg mb-3 mb-lg-0" href="{% url 'budget:category' %}">Add Category</a>
+        <a class="budget-banner-link lead btn btn-outline-success btn-lg mb-3 mb-lg-0" href="{% url 'budget:transaction' %}">Add Transaction</a>
+        
+        <a class="d-lg-none budget-banner-link lead btn btn-outline-success btn-lg mb-3 mb-lg-0" href="{% url 'budget:transaction_list' %}">View All Transactions</a>
+        <a class="d-lg-none budget-banner-link lead btn btn-outline-success btn-lg" href="{% url 'budget:budget_table' %}">View Budget Table</a>
+      
+        <a class="d-none d-lg-inline budget-banner-link lead btn btn-outline-success btn-lg" href="{% url 'budget:transaction_list' %}">View All Transactions</a>
+               
+      </div>
+      <div class="d-flex mt-4">
+        <h2 class="over-under mx-auto mb-0">{{totals_reference.over_under}}</h2>
       </div>
     </div>
 
     <div class="row">    
-      <div id="budget-categories" class="col-12 col-lg-10 mx-lg-auto g-4 col-xl-4 text-start">
+       <div id="budget-categories" class="col-12 mx-lg-auto g-4 col-lg-4 text-start">
         {% for category in categories %}
           <div class="card mb-2">
             <div class="card-body">
@@ -58,239 +67,24 @@
           </div>
         {% endfor %}
         <ul>
-          <li><a href="{% url 'budget:category' %}">Add Category</a></li>      
+          <li><a href="{% url 'budget:category' %}">Add Category</a></li>
         </ul>
       </div> 
 
-      <div class="col-12 col-xl-8 d-flex flex-column mt-2 mt-lg-0">
-        <h4 class="align-self-center">{{totals_reference.over_under}}</h4>
-        {% comment %} Below md, table content overflows {% endcomment %}
+      <div class="col-12 col-lg-8 d-none d-lg-flex flex-column mt-2 mt-lg-0">
         <div class="align-self-md-center">
-          <table class="table table-hover table-responsive" id="budget-dashboard-table">
-            <!-- INCOME SECTION -->
-            <thead>
-              <tr>
-                <th class="budget-table-subheader pe-xxl-4"><em>Income</em></th>
-                <th class="pe-xxl-4">Category</th>
-                <th class="pe-xxl-4 table-category-column">Subcategory</th>
-                <th class="pe-xxl-4">Received</th>
-                <th class="pe-xxl-4">Planned</th>
-                <th class="pe-xxl-4">Remaining</th>
-                <th class="pe-xxl-4">Fund</th>
-              </tr>
-            </thead>
-            <tbody>
-              {% for row in table_reference.income %}
-              <tr class="accordion-toggle collapsed" id="accordion{{forloop.counter}}{{forloop.counter}}" data-bs-toggle="collapse" data-bs-target="#collapse{{forloop.counter}}{{forloop.counter}}" href="#collapse{{forloop.counter}}{{forloop.counter}}" aria-controls="collapse{{forloop.counter}}{{forloop.counter}}">
-                  <td class="expand-button"><span class="num-transactions">({{row.transactions|length}})</span></td>
-                  <td class="budget-table-category"><u>{{ row.category }}</u></td>
-                  <td class="budget-table-category">{{ row.subcategory }}</td>
-                  <td>{{ row.received }}</td>
-                  <td>{{ row.planned }}</td>
-                  <td>{{ row.remaining }}</td>
-                  {% if row.fund %}
-                    <td>
-                      <input class="form-check-input ms-2" type="checkbox" value="" checked disabled>
-                    </td>
-                  {% else %}
-                    <td></td>
-                  {% endif %}
-                </tr>
-
-                <tr class="hide-table-padding">
-                  <td colspan="7">
-                    <div id="collapse{{forloop.counter}}{{forloop.counter}}" class="collapse in p-3">
-                      <div class="row">
-                        <table class="table table-hover transaction-table">
-                          <thead>
-                            <tr>
-                              <th>Date</th>
-                              <th>Amount</th>
-                              <th>Vendor</th>
-                              <th>Account</th>
-                              <th>Notes</th>
-                            </tr>
-                          </thead>
-                          <tbody>
-                            {% for transaction in row.transactions %}
-                              <tr>
-                                <td>{{ transaction.date }}</td>
-                                {% if transaction.expense %}
-                                  <td>-{{ transaction.amount }}</td>
-                                {% elif not transaction.expense %}
-                                  <td>{{ transaction.amount }}</td>
-                                {% endif %}
-                                <td>{{ transaction.vendor }}</td>
-                                <td>{{ transaction.account }}</td>
-                                <td>{{ transaction.notes }}</td>
-                              </tr>
-                            {% endfor %}
-                          </tbody>
-                        </table>
-                      </div>
-                    </div>
-                  </td>
-                </tr>
-
-              {% endfor %}
-              <tr>
-                <td></td>
-                <td></td>
-                <td><strong>Totals - </strong></td>
-                <td><strong>{{ totals_reference.income_received_total }}</strong></td>
-                <td><strong>{{ totals_reference.income_planned_total }}</strong></td>
-                <td><strong>{{ totals_reference.income_remaining_total }}</strong></td>
-              </tr>
-            </tbody>
-
-            <!-- EXPENSE SECTION -->
-            <thead>
-              <tr>
-                <th class="budget-table-subheader pe-xxl-4"><em>Expenses</em></th>
-                <th class="pe-xxl-4">Category</th>
-                <th class="pe-xxl-4 table-category-column">Subcategory</th>
-                <th class="pe-xxl-4">Spent</th>
-                <th class="pe-xxl-4">Planned</th>
-                <th class="pe-xxl-4">Remaining</th>
-                <th class="pe-xxl-4">Fund</th>
-              </tr>
-            </thead>
-            <tbody>
-              {% for row in table_reference.expense %}
-                <tr class="accordion-toggle collapsed" id="accordion{{forloop.counter}}" data-bs-toggle="collapse" data-bs-target="#collapse{{forloop.counter}}" href="#collapse{{forloop.counter}}" aria-controls="collapse{{forloop.counter}}">
-                  <td class="expand-button"><span class="num-transactions">({{row.transactions|length}})</span></td>
-                  <td class="budget-table-category"><u>{{ row.category }}</u></td>
-                  <td class="budget-table-category">{{ row.subcategory }}</td>
-                  <td>{{ row.spent }}</td>
-                  <td>{{ row.planned }}</td>
-                  <td>{{ row.remaining }}</td>
-                  {% if row.fund %}
-                    <td>
-                      <input class="form-check-input ms-2" type="checkbox" value="" checked disabled>
-                    </td>
-                  {% else %}
-                    <td></td>
-                  {% endif %}
-                </tr>
-
-                <tr class="hide-table-padding">
-                  <td colspan="7">
-                    <div id="collapse{{forloop.counter}}" class="collapse in p-3">
-                      <div class="row">
-                        <table class="table table-hover transaction-table">
-                          <thead>
-                            <tr>
-                              <th>Date</th>
-                              <th>Amount</th>
-                              <th>Vendor</th>
-                              <th>Account</th>
-                              <th>Notes</th>
-                            </tr>
-                          </thead>
-                          <tbody>
-                            {% for transaction in row.transactions %}
-                              <tr>
-                                <td>{{ transaction.date }}</td>
-                                {% if transaction.expense %}
-                                  <td>-{{ transaction.amount }}</td>
-                                {% elif not transaction.expense %}
-                                  <td>{{ transaction.amount }}</td>
-                                {% endif %}
-                                <td>{{ transaction.vendor }}</td>
-                                <td>{{ transaction.account }}</td>
-                                <td>{{ transaction.notes }}</td>
-                              </tr>
-                            {% endfor %}
-                          </tbody>
-                        </table>
-                      </div>
-                    </div>
-                  </td>
-                </tr>
-
-              {% endfor %}
-              <tr>
-                <td></td>
-                <td></td>
-                <td><strong>Totals - </strong></td>
-                <td><strong>{{ totals_reference.expenses_spent_total }}</strong></td>
-                <td><strong>{{ totals_reference.expenses_planned_total }}</strong></td>
-                <td><strong>{{ totals_reference.expenses_remaining_total }}</strong></td>
-              </tr>
-            </tbody>
-            <!-- SAVINGS SECTION -->
-            <thead>
-              <tr>
-                <th class="budget-table-subheader pe-xxl-4"><em>Savings</em></th>
-                <th class="pe-xxl-4">Category</th>
-                <th class="pe-xxl-4 table-category-column">Subcategory</th>
-                <th class="pe-xxl-4">Saved</th>
-                <th class="pe-xxl-4">Planned</th>
-                <th class="pe-xxl-4">Remaining</th>
-                <th class="pe-xxl-4">Account Value</th>
-              </tr>
-            </thead>
-            <tbody>
-              {% for row in table_reference.savings %}
-              <tr class="accordion-toggle collapsed" id="accordion{{forloop.counter}}{{forloop.counter}}{{forloop.counter}}" data-bs-toggle="collapse" data-bs-target="#collapse{{forloop.counter}}{{forloop.counter}}{{forloop.counter}}" href="#collapse{{forloop.counter}}{{forloop.counter}}{{forloop.counter}}" aria-controls="collapse{{forloop.counter}}{{forloop.counter}}{{forloop.counter}}">
-                <td class="expand-button"><span class="num-transactions">({{row.transactions|length}})</span></td>
-                <td class="budget-table-category"><u>{{ row.category }}</u></td>
-                <td class="budget-table-category">{{ row.subcategory }}</td>
-                <td>{{ row.saved }}</td>
-                <td>{{ row.planned }}</td>
-                <td>{{ row.remaining }}</td>
-                <td>{{ row.account_value }}</td>
-              </tr>
-
-              <tr class="hide-table-padding">
-                <td colspan="7">
-                  <div id="collapse{{forloop.counter}}{{forloop.counter}}{{forloop.counter}}" class="collapse in p-3">
-                    <div class="row">
-                      <table class="table table-hover transaction-table">
-                        <thead>
-                          <tr>
-                            <th>Date</th>
-                            <th>Amount</th>
-                            <th>Vendor</th>
-                            <th>Account</th>
-                            <th>Notes</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {% for transaction in row.transactions %}
-                            <tr>
-                              <td>{{ transaction.date }}</td>
-                              {% if transaction.expense %}
-                                <td>-{{ transaction.amount }}</td>
-                              {% elif not transaction.expense %}
-                                <td>{{ transaction.amount }}</td>
-                              {% endif %}
-                              <td>{{ transaction.vendor }}</td>
-                              <td>{{ transaction.account }}</td>
-                              <td>{{ transaction.notes }}</td>
-                            </tr>
-                          {% endfor %}
-                        </tbody>
-                      </table>
-                    </div>
-                  </div>
-                </td>
-              </tr>
-
-              {% endfor %}
-              <tr>
-                <td></td>
-                <td></td>
-                <td><strong>Totals - </strong></td>
-                <td><strong>{{ totals_reference.savings_saved_total }}</strong></td>
-                <td><strong>{{ totals_reference.savings_planned_total }}</strong></td>
-                <td><strong>{{ totals_reference.savings_remaining_total }}</strong></td>
-              </tr> 
-            </tbody>
-          </table>
+          {% include './budget_table_content.html' %}
         </div>
       </div>
+    
     </div>
+
+    <div class="row">
+      <div class="col-12 d-flex">
+        <a class="btn btn-outline-danger btn-lg mx-auto mt-4 scary-delete-button" href="{% url 'budget:delete_month' month_id%}"><b>Delete Month</b></a>
+      </div>
+    </div>
+
   </div>
 
 {% endblock %}
