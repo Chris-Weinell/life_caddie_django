@@ -325,3 +325,7 @@ tr.hide-table-padding td {
 .red {
     color: red;
 }
+
+.d-none {
+    display: none;
+}
