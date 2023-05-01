@@ -7,7 +7,6 @@ services:
     restart: always
     volumes:
       - static-data:/var/www/static
-      - cert-data:/etc/letsencrypt/live/yourlifecaddie.com
     env_file:
       - .env
     environment:
@@ -42,7 +41,6 @@ services:
       - 80:8000
     volumes:
       - static-data:/var/www/static
-      - cert-data:/etc/letsencrypt/live/yourlifecaddie.com
 
 volumes:
   postgres-data:
