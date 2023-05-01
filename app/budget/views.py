@@ -481,7 +481,23 @@ class NewMonthCreateView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
     def get_initial(self):
         current_month = datetime.now().month
         current_year = datetime.now().year
-        initial_month_year = f"{current_month}-{current_year}"
+
+        current_month_exists = Month.objects.filter(
+            user = self.request.user,
+            month = current_month,
+            year = current_year,
+        ).exists()
+        
+        if current_month_exists:
+            initial_month_year = f"{current_month}-{current_year}"
+        else:
+            recent_mth = Month.objects.filter(
+                user = self.request.user,
+                month__lte = current_month,
+                year__lte = current_year,
+            ).order_by('-year', '-month')[0]
+            initial_month_year = f"{recent_mth.month}-{recent_mth.year}"
+        
         initial = {
             'user': self.request.user,
             'month': self.request.session['date']['month'],
