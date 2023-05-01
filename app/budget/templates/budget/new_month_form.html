@@ -15,13 +15,17 @@
 {% block content %}
   <div class="container">
     <p class="mt-4">Looks like you you haven't created a budget for this month yet!</p>
-    <p>Would you like to copy categories from the current month's budget to this month?</p>
-    <form action="", method="POST">
+    <p>Would you like to copy categories from another month's budget into this month?</p>
+    <form id="new-month-form" action="", method="POST">
       {% csrf_token %}
-      {{form.copy}}
       {{form.user.as_hidden}}
       {{form.month.as_hidden}}
       {{form.year.as_hidden}}
+      {{form.copy}}
+      <div id="new-month-year-div" class="mt-3">
+        <label for="month-year" class="form-label"><strong>Which Month would you like to copy?</strong></label>
+        {{form.month_year}}
+      </div>
       <input class="btn btn-success mt-4" type="submit" value="Continue">
     </form>
   </div>

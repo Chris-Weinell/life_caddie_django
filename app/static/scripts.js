@@ -45,3 +45,17 @@ window.addEventListener('DOMContentLoaded', (event) => {
     // current month as leftmost month in the select.
     scrollable.scrollLeft = (100 * scrollItemindex) - 200;
 })
+
+
+// Causes the month_year form field to disappear if user selects
+// that they don't want to copy an existing month to the new month
+// template - new_month_form.html
+// view - NewMonthCreateView
+const radioButtons = document.querySelectorAll('input[name="copy"]')
+const monthSelect = document.querySelector('#new-month-year-div')
+
+radioButtons.forEach((radioButton) => {
+    radioButton.addEventListener('change', (event) => {
+        monthSelect.classList.toggle('d-none');
+    })
+})

@@ -30,8 +30,23 @@ class AccountForm(LoginRequiredMixin, forms.ModelForm):
 
 class MonthForm(LoginRequiredMixin, forms.ModelForm):
     """Month Create Form"""
-    copy = forms.BooleanField(required=False, widget=forms.RadioSelect(
-        choices=((True, 'Yes'), (False, 'No'))))
+    month_year = forms.ChoiceField(
+        choices=month_year_choices,
+        required=False,
+        widget=forms.Select(attrs={
+            'class': 'form-control',
+            'id': 'month-year',
+        })
+    )
+    copy = forms.BooleanField(
+        required=False, 
+        widget=forms.RadioSelect(
+            choices=(
+                (True, 'Yes'), 
+                (False, 'No')
+            )
+        )
+    )
 
     class Meta:
         model = Month

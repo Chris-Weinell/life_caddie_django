@@ -438,7 +438,8 @@ class FirstMonthCreateView(
             'user': self.request.user,
             'month': self.request.session['date']['month'],
             'year': self.request.session['date']['year'],
-            'copy': False
+            'month_year': None,
+            'copy': False,
         }
         return initial
 
@@ -478,13 +479,37 @@ class NewMonthCreateView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
     template_name = 'budget/new_month_form.html'
 
     def get_initial(self):
+        current_month = datetime.now().month
+        current_year = datetime.now().year
+        initial_month_year = f"{current_month}-{current_year}"
         initial = {
             'user': self.request.user,
             'month': self.request.session['date']['month'],
             'year': self.request.session['date']['year'],
+            'month_year': initial_month_year,
             'copy': True
         }
         return initial
+    
+    def get_form(self, form_class = None):
+        form = super().get_form(form_class)
+        user_months = Month.objects.filter(
+            user = self.request.user,
+        ).order_by('year', 'month')
+        month_choices = [
+            (
+                f"{month.month}-{month.year}",
+                f"{month_reference_dict_full[month.month]}, {month.year}"
+            )
+            for month in user_months
+        ]
+        form.fields['month_year'].choices = month_choices
+        return form
+
+    def get_context_data(self, *args, **kwargs):
+        context = super().get_context_data(*args, **kwargs)
+        context['title'] = 'New Month'
+        return context
 
     def test_func(self):
         month_exists = Month.objects.filter(
@@ -496,46 +521,44 @@ class NewMonthCreateView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
             return False
         return True
 
-    def get_context_data(self, *args, **kwargs):
-        context = super().get_context_data(*args, **kwargs)
-        context['title'] = 'New Month'
-        return context
-
     def form_valid(self, form):
-        # form.cleaned_data example - {'user': <User: weinellcj@live.com>,
-        # 'month': 3, 'year': 2023, 'copy': True} below if statement creates
-        # user's existing categories and subcategories into the new month.
+        # form.cleaned_data example:
+        # { 'user': <User: test@example.com>, 
+        #   'month_year': '4-2023', 
+        #   'copy': True }
+        parsed_month_year = form.cleaned_data['month_year'].split('-')
+        form_month = int(parsed_month_year[0])
+        form_year = int(parsed_month_year[1])
+        
         if form.cleaned_data['copy']:
-            month_now = datetime.now().month
-            year_now = datetime.now().year
-            current_month = Month.objects.get(
-                user=self.request.user,
-                month=month_now,
-                year=year_now
+            month_to_copy = Month.objects.get(
+                user = self.request.user,
+                month = form_month,
+                year = form_year,
             )
-            # creates new month used data pass in from form.
+            # creates new month using data pass in from form.
             new_month = Month.objects.create(
                 month=form.cleaned_data['month'],
                 year=form.cleaned_data['year'],
                 user=form.cleaned_data['user']
             )
-            # finds all categories associated with the previous month.
-            pre_month_categories = Category.objects.filter(
-                month=current_month
-            )
-            for category in pre_month_categories:
-                # recreates the previous month's categories using
+            # finds all categories associated with the selected month.
+            month_to_copy_categories = Category.objects.filter(
+                month=month_to_copy
+            ).order_by('id')
+            for category in month_to_copy_categories:
+                # recreates the selected month's categories using
                 # the id of the new month.
                 new_category = Category.objects.create(
                     name=category.name,
                     month_id=new_month.id
                 )
                 # finds all subcategories associated with the current
-                # category from the previous month.
+                # category from the selected month.
                 subcategories = SubCategory.objects.filter(
                     category=category
-                )
-                # recreates the previous category's subcategories
+                ).order_by('id')
+                # recreates the selected category's subcategories
                 # using the new category's id.
                 for subcategory in subcategories:
                     SubCategory.objects.create(
